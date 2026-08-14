@@ -15,6 +15,7 @@ router = APIRouter(tags=["companions"])
 CITIES = [
     "Nairobi", "Mombasa", "Diani", "Kisumu", "Nakuru", "Eldoret",
     "Nyeri", "Malindi", "Lamu", "Naivasha", "Machakos", "Thika",
+    "Nyahururu",
 ]
 
 ACTIVITY_TYPES = [
@@ -130,6 +131,7 @@ def search_companions(
     languages: str | None = None,
     date: date | None = None,
     max_rate: int | None = None,
+    min_rating: float | None = None,
     activity: str | None = None,
     sort: str = "rating",  # rating | price_asc | price_desc | newest
     page: int = Query(1, ge=1),
@@ -156,6 +158,8 @@ def search_companions(
             q = q.filter(User.languages.astype("text").ilike(f"%{w}%"))
     if max_rate:
         q = q.filter(CompanionProfile.hourly_rate_kes <= max_rate)
+    if min_rating:
+        q = q.filter(CompanionProfile.rating_avg >= min_rating)
     if activity:
         q = q.filter(CompanionProfile.activity_types.astype("text").ilike(f"%{activity}%"))
 

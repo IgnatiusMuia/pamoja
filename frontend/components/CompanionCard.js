@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Avatar from "./Avatar";
+import FavHeart from "./FavHeart";
 import Stars from "./Stars";
 import { activityEmoji } from "@/lib/activities";
 
@@ -18,17 +21,21 @@ export default function CompanionCard({ companion }) {
     >
       <div className={`relative h-40 bg-gradient-to-br ${gradient} flex items-center justify-center p-4`}>
         <span className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_70%_20%,rgba(251,191,36,0.25),transparent_60%)]" />
-        <Avatar user={companion} size="lg" className="h-24 w-24 text-3xl ring-4 ring-white shadow-xl" />
+        <FavHeart
+          companionId={companion.id}
+          className="absolute top-3 right-3 h-8 w-8"
+        />
         {companion.verified_id && (
-          <span className="absolute top-3 right-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
+          <span className="absolute top-3 left-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
             ✓ Verified
           </span>
         )}
         {companion.is_featured && (
-          <span className="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
+          <span className={companion.verified_id ? "absolute top-12 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md" : "absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md"}>
             ★ Featured
           </span>
         )}
+        <Avatar user={companion} size="lg" className="h-24 w-24 text-3xl ring-4 ring-white shadow-xl" />
       </div>
       <div className="p-5 flex flex-col gap-1.5 grow">
         <div className="flex items-start justify-between gap-2">

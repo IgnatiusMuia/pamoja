@@ -74,7 +74,8 @@ Open http://localhost:3000
 ## Feature checklist (MVP)
 
 - [x] Registration & login (traveller / companion roles), JWT auth
-- [x] Free search with filters: city, gender, date, interests, languages, activity (45+ types), max rate, sort
+- [x] Free search with filters: city (autocomplete), gender, date, interests, languages, activity (45+ types), min rating, max rate, sort
+- [x] Saved companions — heart to save anywhere, manage list on the dashboard
 - [x] Activities showcase page (/activities) — Kenya-adapted catalogue with descriptions
 - [x] Public companion profiles: bio, interests, languages, availability, reviews, hourly rate (KSH)
 - [x] Booking flow: request → accept / decline → completed / cancelled

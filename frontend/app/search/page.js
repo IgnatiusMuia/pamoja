@@ -9,7 +9,7 @@ import { ACTIVITIES } from "@/lib/activities";
 
 const CITIES = [
   "Nairobi", "Mombasa", "Diani", "Kisumu", "Nakuru", "Eldoret",
-  "Nyeri", "Malindi", "Lamu", "Naivasha", "Machakos", "Thika",
+  "Nyeri", "Malindi", "Lamu", "Naivasha", "Machakos", "Thika", "Nyahururu",
 ];
 
 function buildQuery(params) {
@@ -40,6 +40,7 @@ function SearchContent() {
     languages: searchParams.get("languages") || "",
     date: searchParams.get("date") || "",
     max_rate: searchParams.get("max_rate") || "",
+    min_rating: searchParams.get("min_rating") || "",
     sort: "rating",
   });
   const [results, setResults] = useState([]);
@@ -79,14 +80,16 @@ function SearchContent() {
       <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <label className="block">
           <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">City</span>
-          <select
+          <input
             value={filters.city}
             onChange={(e) => set("city", e.target.value)}
+            list="pamoja-cities"
+            placeholder="Type a city…"
             className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          >
-            <option value="">Anywhere in Kenya</option>
-            {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          />
+          <datalist id="pamoja-cities">
+            {CITIES.map((c) => <option key={c} value={c} />)}
+          </datalist>
         </label>
         <label className="block">
           <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">Gender</span>
@@ -152,6 +155,19 @@ function SearchContent() {
           />
         </label>
         <label className="block">
+          <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">Min rating</span>
+          <select
+            value={filters.min_rating}
+            onChange={(e) => set("min_rating", e.target.value)}
+            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <option value="">Any rating</option>
+            <option value="4.5">4.5 ★ and up</option>
+            <option value="4">4 ★ and up</option>
+            <option value="3.5">3.5 ★ and up</option>
+          </select>
+        </label>
+        <label className="block">
           <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">Sort by</span>
           <select
             value={filters.sort}
@@ -182,7 +198,7 @@ function SearchContent() {
           <p className="text-stone-500 text-sm mt-1">Try widening your search or clearing some filters.</p>
           <button
             onClick={() => {
-              setFilters({ ...filters, city: "", gender: "", activity: "", interests: "", languages: "", date: "", max_rate: "", sort: "rating" });
+              setFilters({ ...filters, city: "", gender: "", activity: "", interests: "", languages: "", date: "", max_rate: "", min_rating: "", sort: "rating" });
               router.replace("/search");
             }}
             className="mt-4 text-emerald-700 font-bold hover:underline"

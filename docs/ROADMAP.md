@@ -23,7 +23,7 @@
 
 **Month 2 — Scale & speed**
 4. WebSockets for instant chat (replace 5-second polling).
-5. Search: add rating filters, saved companions/bookmarks, city autocomplete.
+5. ~~Search: add rating filters, saved companions/bookmarks, city autocomplete.~~ ✅ done — min-rating filter, city autocomplete (datalist), favorites/saved companions (cards + `/dashboard/saved`).
 6. Availability: real calendar (block out dates, time slots) + booking conflict guard.
 
 **Month 3 — Safety & growth**

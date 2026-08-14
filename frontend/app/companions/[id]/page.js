@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Avatar from "@/components/Avatar";
+import FavHeart from "@/components/FavHeart";
 import Stars from "@/components/Stars";
 import { api } from "@/lib/api";
 import { isLoggedIn } from "@/lib/auth";
@@ -48,7 +49,8 @@ export default function CompanionProfilePage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       {/* header card */}
       <div className="bg-white border border-stone-200 rounded-3xl shadow-sm overflow-hidden">
-        <div className="h-40 bg-gradient-to-br from-emerald-200 via-teal-100 to-sky-200 flex items-center justify-center">
+        <div className="h-40 bg-gradient-to-br from-emerald-200 via-teal-100 to-sky-200 flex items-center justify-center relative">
+          <FavHeart companionId={c.id} className="absolute top-4 right-4 h-10 w-10" />
           <Avatar user={c} size="lg" className="h-32 w-32 text-4xl ring-4 ring-white" />
         </div>
         <div className="p-6 lg:p-8 -mt-10">

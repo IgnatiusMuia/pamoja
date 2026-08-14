@@ -151,3 +151,16 @@ class Block(Base):
     blocker_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     blocked_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Favorite(Base):
+    __tablename__ = "favorites"
+    __table_args__ = (UniqueConstraint("user_id", "companion_id", name="uq_favorite_pair"),)
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    companion_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", foreign_keys=[user_id])
+    companion = relationship("User", foreign_keys=[companion_id])
