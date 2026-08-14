@@ -7,6 +7,7 @@ from ..config import settings
 from ..database import get_db
 from ..models import Booking, CompanionProfile, User
 from ..routers.companions import is_available_on
+from ..routers.notifications import notify
 from ..schemas import BookingCreateIn, BookingOut, ReviewCreateIn, ReviewOut
 from ..security import get_current_user
 
@@ -119,6 +120,13 @@ def create_booking(body: BookingCreateIn, user: User = Depends(get_current_user)
     db.add(booking)
     db.commit()
     db.refresh(booking)
+    notify(
+        db, booking.companion_id, "booking",
+        f"New booking request from {user.name}",
+        f"{booking.activity} on {booking.booking_date} · {booking.hours}h · {booking.total_kes:,} KSH",
+        link=f"/dashboard/bookings/{booking.id}",
+    )
+    db.commit()
     return _booking_out(booking)
 
 
@@ -162,6 +170,13 @@ def accept_booking(booking_id: int, user: User = Depends(get_current_user),
     b = _participant_booking(booking_id, user, db, ("companion",), ("pending",))
     b.status = "accepted"
     db.commit()
+    notify(
+        db, b.traveler_id, "booking",
+        f"{user.name} accepted your booking",
+        f"{b.activity} · {b.booking_date} · {b.total_kes:,} KSH — you're all set!",
+        link=f"/dashboard/bookings/{b.id}",
+    )
+    db.commit()
     return _booking_out(b)
 
 
@@ -170,6 +185,13 @@ def decline_booking(booking_id: int, user: User = Depends(get_current_user),
                     db: Session = Depends(get_db)):
     b = _participant_booking(booking_id, user, db, ("companion",), ("pending",))
     b.status = "declined"
+    db.commit()
+    notify(
+        db, b.traveler_id, "booking",
+        f"{user.name} declined your booking request",
+        f"{b.activity} on {b.booking_date} — browse more companions to find another match.",
+        link="/search",
+    )
     db.commit()
     return _booking_out(b)
 
@@ -180,6 +202,13 @@ def cancel_booking(booking_id: int, user: User = Depends(get_current_user),
     b = _participant_booking(booking_id, user, db, ("traveler",), ("pending", "accepted"))
     b.status = "cancelled"
     db.commit()
+    notify(
+        db, b.companion_id, "booking",
+        f"{user.name} cancelled the booking",
+        f"{b.activity} on {b.booking_date} is now free.",
+        link=f"/dashboard/bookings/{b.id}",
+    )
+    db.commit()
     return _booking_out(b)
 
 
@@ -188,6 +217,13 @@ def complete_booking(booking_id: int, user: User = Depends(get_current_user),
                      db: Session = Depends(get_db)):
     b = _participant_booking(booking_id, user, db, ("traveler", "companion"), ("accepted",))
     b.status = "completed"
+    db.commit()
+    notify(
+        db, b.companion_id if user.id == b.traveler_id else b.traveler_id, "booking",
+        f"{user.name} marked your time together as completed",
+        f"Ready for {b.activity}? Rate each other to keep the community trusted.",
+        link=f"/dashboard/bookings/{b.id}",
+    )
     db.commit()
     return _booking_out(b)
 
@@ -231,6 +267,14 @@ def _create_review_logic(db, body, user, b):
             cp.rating_count = len(reviews)
             cp.rating_avg = round(sum(r.rating for r in reviews) / len(reviews), 1)
             db.commit()
+
+    notify(
+        db, reviewee_id, "review",
+        f"{user.name} left you a {'★' * body.rating} review",
+        body.comment or "Thanks for being a great companion!",
+        link=f"/companions/{b.companion_id}",
+    )
+    db.commit()
 
     return ReviewOut(
         id=review.id, booking_id=review.booking_id, reviewer_id=review.reviewer_id,

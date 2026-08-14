@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Block, Booking, Conversation, Message, User
 from ..moderation import flag_message
+from ..routers.notifications import notify
 from ..schemas import ConversationCreateIn, ConversationOut, MessageCreateIn, MessageOut
 from ..security import get_current_user
 
@@ -137,4 +138,11 @@ def send_message(conversation_id: int, body: MessageCreateIn,
     db.add(message)
     db.commit()
     db.refresh(message)
+    notify(
+        db, other.id, "message",
+        f"New message from {user.name}",
+        body_text[:120] + ("…" if len(body_text) > 120 else ""),
+        link=f"/dashboard/messages/{conversation_id}",
+    )
+    db.commit()
     return message

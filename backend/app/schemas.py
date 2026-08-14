@@ -185,6 +185,18 @@ class ReviewCreateIn(BaseModel):
     comment: Optional[str] = None
 
 
+class NotificationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    type: str
+    title: str
+    body: Optional[str] = None
+    link: Optional[str] = None
+    read_at: Optional[datetime] = None
+    created_at: datetime
+
+
 class ReviewOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

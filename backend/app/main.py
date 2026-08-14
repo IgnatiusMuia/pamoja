@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import Base, SessionLocal, engine
 from .routers import (admin, auth, bookings, companions, favorites, messaging,
-                      safety)
+                      notifications, safety)
 from .seed import seed
 
 
@@ -42,6 +42,7 @@ app.include_router(bookings.router)
 app.include_router(messaging.router)
 app.include_router(safety.router)
 app.include_router(favorites.router)
+app.include_router(notifications.router)
 app.include_router(admin.router)
 
 

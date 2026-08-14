@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import NotificationBell from "./NotificationBell";
 import { clearSession, getUser, isLoggedIn } from "@/lib/auth";
 
 export default function Navbar() {
@@ -77,6 +78,7 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           {user ? (
             <>
+              <NotificationBell />
               <Link
                 href="/dashboard"
                 className="text-sm font-semibold text-stone-600 hover:text-emerald-700 transition-colors"
