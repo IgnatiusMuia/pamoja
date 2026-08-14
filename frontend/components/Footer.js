@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CITIES, CITY_INFO, citySlug } from "@/lib/cities";
 
 export default function Footer() {
   return (
@@ -25,20 +26,27 @@ export default function Footer() {
           </ul>
         </div>
         <div>
+          <h4 className="font-bold text-white mb-3">Cities</h4>
+          <ul className="space-y-2 text-sm">
+            {CITIES.slice(0, 6).map((c) => (
+              <li key={c}>
+                <Link className="hover:text-emerald-400" href={`/cities/${citySlug(c)}`}>
+                  {CITY_INFO[c].emoji} {c}
+                </Link>
+              </li>
+            ))}
+            <li><Link className="hover:text-emerald-400 text-emerald-400" href="/search">All cities →</Link></li>
+          </ul>
+        </div>
+        <div>
           <h4 className="font-bold text-white mb-3">Trust & Safety</h4>
           <ul className="space-y-2 text-sm">
             <li><Link className="hover:text-emerald-400" href="/safety">Safety & Code of Conduct</Link></li>
             <li><Link className="hover:text-emerald-400" href="/guidelines">Community Guidelines</Link></li>
             <li><Link className="hover:text-emerald-400" href="/privacy">Privacy Policy</Link></li>
             <li><Link className="hover:text-emerald-400" href="/terms">Terms of Service</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="font-bold text-white mb-3">Contact</h4>
-          <ul className="space-y-2 text-sm text-stone-400">
-            <li>📧 support@pamoja.ke</li>
-            <li>📍 Nairobi, Kenya</li>
-            <li className="pt-2 text-stone-500">Built with ❤️ in Kenya</li>
+            <li className="pt-2 text-stone-400">📧 support@pamoja.ke</li>
+            <li className="text-stone-500">📍 Nairobi, Kenya · Built with ❤️ in Kenya</li>
           </ul>
         </div>
       </div>

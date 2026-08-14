@@ -2,15 +2,11 @@ import Link from "next/link";
 import CompanionCard from "@/components/CompanionCard";
 import { api } from "@/lib/api";
 import { ACTIVITIES } from "@/lib/activities";
+import { CITIES, CITY_INFO, citySlug } from "@/lib/cities";
 
 export const dynamic = "force-dynamic";
 
 const POPULAR = ["city_tours", "coffee", "museums", "dining", "beaches", "hiking", "photography", "wildlife"];
-
-const CITIES = [
-  "Nairobi", "Mombasa", "Diani", "Kisumu", "Nakuru",
-  "Eldoret", "Nyeri", "Malindi", "Lamu", "Naivasha",
-];
 
 const STEPS = [
   {
@@ -125,17 +121,18 @@ export default async function Home() {
 
       {/* CITIES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
-        <h2 className="text-2xl lg:text-3xl font-extrabold text-center mb-8">
+        <h2 className="text-2xl lg:text-3xl font-extrabold text-center mb-3">
           Find companions in <span className="text-emerald-700">every corner of Kenya</span>
         </h2>
+        <p className="text-stone-500 text-center mb-8">Dedicated city pages with locals, highlights and things to do</p>
         <div className="flex flex-wrap justify-center gap-3">
           {CITIES.map((city) => (
             <Link
               key={city}
-              href={`/search?city=${encodeURIComponent(city)}`}
+              href={`/cities/${citySlug(city)}`}
               className="px-5 py-2.5 bg-white border border-stone-200 rounded-full font-semibold text-stone-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-colors shadow-sm"
             >
-              📍 {city}
+              {CITY_INFO[city].emoji} {city}
             </Link>
           ))}
         </div>
