@@ -1,9 +1,12 @@
+from datetime import date, datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import (Booking, CompanionProfile, Conversation, Message, Report,
-                      User)
+                      Review, User)
 from ..schemas import AdminStatsOut
 from ..security import require_admin
 
@@ -164,3 +167,66 @@ def dismiss_report(report_id: int, db: Session = Depends(get_db),
     report.status = "dismissed"
     db.commit()
     return {"ok": True}
+
+
+@router.get("/analytics")
+def analytics(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    STATUSES = ["pending", "accepted", "declined", "cancelled", "completed"]
+    bookings_by_status = {
+        s: db.query(Booking).filter(Booking.status == s).count() for s in STATUSES
+    }
+
+    paid = db.query(Booking).filter(Booking.status == "completed").all()
+    revenue = {
+        "bookings": len(paid),
+        "total_kes": sum(b.total_kes for b in paid),
+        "commission_kes": sum(b.commission_kes for b in paid),
+        "payouts_kes": sum(b.payout_kes for b in paid),
+    }
+
+    top_rows = (
+        db.query(User.name, func.count(Booking.id), func.sum(Booking.commission_kes))
+        .join(Booking, Booking.companion_id == User.id)
+        .filter(Booking.status == "completed")
+        .group_by(User.id)
+        .order_by(func.sum(Booking.commission_kes).desc())
+        .limit(5)
+        .all()
+    )
+    top_companions = [
+        {"name": name, "bookings": int(cnt), "commission_kes": int(comm or 0)}
+        for name, cnt, comm in top_rows
+    ]
+
+    since = date.today() - timedelta(days=13)
+    signup_rows = (
+        db.query(func.date(User.created_at), func.count(User.id))
+        .filter(func.date(User.created_at) >= since)
+        .group_by(func.date(User.created_at))
+        .all()
+    )
+    by_day = {str(d): c for d, c in signup_rows}
+    signups_by_day = [
+        {"date": (since + timedelta(days=i)).isoformat(),
+         "count": by_day.get((since + timedelta(days=i)).isoformat(), 0)}
+        for i in range(14)
+    ]
+
+    city_rows = (
+        db.query(User.city, func.count(User.id))
+        .filter(User.role == "companion", User.city.isnot(None))
+        .group_by(User.city)
+        .order_by(func.count(User.id).desc())
+        .all()
+    )
+    companions_by_city = [{"city": c or "—", "count": n} for c, n in city_rows]
+
+    rating = db.query(func.avg(CompanionProfile.rating_avg)).scalar()
+    return {
+        "bookings_by_status": bookings_by_status,
+        "revenue": revenue,
+        "top_companions": top_companions,
+        "signups_by_day": signups_by_day,
+        "companions_by_city": companions_by_city,
+        "avg_rating": round(float(rating or 0), 2),
+    }

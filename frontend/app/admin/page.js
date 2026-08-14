@@ -11,20 +11,23 @@ export default function AdminPage() {
   const [companions, setCompanions] = useState([]);
   const [reports, setReports] = useState([]);
   const [flagged, setFlagged] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [tab, setTab] = useState("companions");
   const [statusFilter, setStatusFilter] = useState("pending");
 
   async function refresh() {
-    const [s, c, r, f] = await Promise.all([
+    const [s, c, r, f, a] = await Promise.all([
       api("/admin/stats", { token: getToken() }),
       api("/admin/companions?status=" + statusFilter, { token: getToken() }),
       api("/admin/reports?status=open", { token: getToken() }),
       api("/admin/flagged-messages", { token: getToken() }),
+      api("/admin/analytics", { token: getToken() }).catch(() => null),
     ]);
     setStats(s);
     setCompanions(c);
     setReports(r);
     setFlagged(f);
+    setAnalytics(a);
   }
 
   useEffect(() => {
@@ -86,6 +89,10 @@ export default function AdminPage() {
         <button onClick={() => setTab("flagged")}
           className={`px-5 py-2 rounded-full text-sm font-bold ${tab === "flagged" ? "bg-amber-600 text-white" : "bg-white border border-stone-200 text-stone-600"}`}>
           Auto-filtered messages {flagged.length > 0 ? `(${flagged.length})` : ""}
+        </button>
+        <button onClick={() => setTab("analytics")}
+          className={`px-5 py-2 rounded-full text-sm font-bold ${tab === "analytics" ? "bg-sky-600 text-white" : "bg-white border border-stone-200 text-stone-600"}`}>
+          Analytics
         </button>
       </div>
 
@@ -190,6 +197,106 @@ export default function AdminPage() {
               <p className="text-xs text-stone-400 mt-2">Original content removed automatically — an open report was filed on behalf of the sender.</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === "analytics" && (
+        <div className="space-y-6">
+          {!analytics ? (
+            <p className="text-stone-400 text-center py-8">Analytics unavailable.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  ["Completed bookings", analytics.revenue.bookings, "text-emerald-600"],
+                  ["Commission earned", analytics.revenue.commission_kes.toLocaleString() + " KSH", "text-orange-600"],
+                  ["Paid out to companions", analytics.revenue.payouts_kes.toLocaleString() + " KSH", "text-sky-600"],
+                  ["Avg companion rating", "★ " + analytics.avg_rating, "text-amber-500"],
+                ].map(([label, value, color]) => (
+                  <div key={label} className="bg-white border border-stone-200 rounded-2xl p-4 shadow-sm">
+                    <p className="text-xs font-bold text-stone-400 uppercase">{label}</p>
+                    <p className={`text-xl font-extrabold mt-1 ${color}`}>{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-6">
+                <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold mb-4">Bookings by status</h3>
+                  <div className="space-y-2.5">
+                    {Object.entries(analytics.bookings_by_status).map(([status, count]) => {
+                      const max = Math.max(1, ...Object.values(analytics.bookings_by_status));
+                      return (
+                        <div key={status} className="flex items-center gap-3 text-sm">
+                          <span className="w-24 capitalize text-stone-500 font-semibold">{status}</span>
+                          <div className="flex-1 h-3 bg-stone-100 rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${status === "completed" ? "bg-emerald-500" : status === "accepted" ? "bg-sky-500" : status === "pending" ? "bg-amber-400" : "bg-stone-300"}`}
+                              style={{ width: `${(count / max) * 100}%` }} />
+                          </div>
+                          <span className="w-8 text-right font-bold">{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold mb-4">Top companions by commission (KSH)</h3>
+                  {analytics.top_companions.length === 0 ? (
+                    <p className="text-stone-400 text-sm">No completed bookings yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {analytics.top_companions.map((tc, i) => (
+                        <div key={tc.name} className="flex items-center gap-3 text-sm">
+                          <span className="font-extrabold text-stone-400 w-6">{i + 1}.</span>
+                          <span className="font-semibold grow">{tc.name}</span>
+                          <span className="text-stone-400">{tc.bookings} booking{tc.bookings !== 1 ? "s" : ""}</span>
+                          <span className="font-bold text-emerald-700">{tc.commission_kes.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-6">
+                <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold mb-4">Signups — last 14 days</h3>
+                  <div className="flex items-end gap-1.5 h-28">
+                    {analytics.signups_by_day.map((d) => {
+                      const max = Math.max(1, ...analytics.signups_by_day.map((x) => x.count));
+                      return (
+                        <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                          <span className="text-[10px] font-bold text-stone-500">{d.count > 0 ? d.count : ""}</span>
+                          <div className={`w-full rounded-t ${d.count > 0 ? "bg-gradient-to-t from-emerald-600 to-teal-400" : "bg-stone-100"}`}
+                            style={{ height: `${(d.count / max) * 100}%` }} />
+                          <span className="text-[9px] text-stone-400">{new Date(d.date).getDate()}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold mb-4">Companions by city</h3>
+                  <div className="space-y-2.5">
+                    {analytics.companions_by_city.map((c) => {
+                      const max = Math.max(1, ...analytics.companions_by_city.map((x) => x.count));
+                      return (
+                        <div key={c.city} className="flex items-center gap-3 text-sm">
+                          <span className="w-24 font-semibold text-stone-600">{c.city}</span>
+                          <div className="flex-1 h-3 bg-stone-100 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500" style={{ width: `${(c.count / max) * 100}%` }} />
+                          </div>
+                          <span className="w-8 text-right font-bold">{c.count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

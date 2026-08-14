@@ -30,7 +30,7 @@
 7. ~~AI moderation: keyword flagging on profiles/messages, image safety check.~~ ✅ keyword layer done — auto-censor banned terms in chat (EN + Swahili/Sheng), auto-file reports, profile text scan on save, admin "Auto-filtered messages" queue. Image checks still pending.
 8. ID verification: KYC via government ID upload (manual + OCR later).
 9. Notifications: in-app + email digests; companion promo page (SEO landing per city). ✅ city landing pages live (`/cities/nairobi` etc. — local companions, highlights, activities, other-cities nav). Notifications still pending.
-10. Admin 2.0: analytics, dispute resolution, refund/commission ledger.
+10. ~~Admin 2.0: analytics, dispute resolution, refund/commission ledger.~~ ✅ analytics live: bookings-by-status chart, commission/payout totals, top companions, 14-day signups, companions-by-city, avg rating. Dispute resolution + refunds remain stubbed until payments ship.
 
 ## Suggested launch sequence
 
