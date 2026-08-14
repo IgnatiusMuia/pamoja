@@ -10,18 +10,21 @@ export default function AdminPage() {
   const [stats, setStats] = useState(null);
   const [companions, setCompanions] = useState([]);
   const [reports, setReports] = useState([]);
+  const [flagged, setFlagged] = useState([]);
   const [tab, setTab] = useState("companions");
   const [statusFilter, setStatusFilter] = useState("pending");
 
   async function refresh() {
-    const [s, c, r] = await Promise.all([
+    const [s, c, r, f] = await Promise.all([
       api("/admin/stats", { token: getToken() }),
       api("/admin/companions?status=" + statusFilter, { token: getToken() }),
       api("/admin/reports?status=open", { token: getToken() }),
+      api("/admin/flagged-messages", { token: getToken() }),
     ]);
     setStats(s);
     setCompanions(c);
     setReports(r);
+    setFlagged(f);
   }
 
   useEffect(() => {
@@ -79,6 +82,10 @@ export default function AdminPage() {
         <button onClick={() => setTab("reports")}
           className={`px-5 py-2 rounded-full text-sm font-bold ${tab === "reports" ? "bg-red-600 text-white" : "bg-white border border-stone-200 text-stone-600"}`}>
           Reports {stats?.open_reports > 0 ? `(${stats.open_reports})` : ""}
+        </button>
+        <button onClick={() => setTab("flagged")}
+          className={`px-5 py-2 rounded-full text-sm font-bold ${tab === "flagged" ? "bg-amber-600 text-white" : "bg-white border border-stone-200 text-stone-600"}`}>
+          Auto-filtered messages {flagged.length > 0 ? `(${flagged.length})` : ""}
         </button>
       </div>
 
@@ -163,6 +170,24 @@ export default function AdminPage() {
                   Dismiss
                 </button>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === "flagged" && (
+        <div className="space-y-3">
+          {flagged.length === 0 && (
+            <p className="text-stone-400 text-center py-8">🛡️ No auto-filtered messages. Community guidelines holding strong.</p>
+          )}
+          {flagged.map((m) => (
+            <div key={m.id} className="bg-white border border-amber-200 rounded-2xl p-4 shadow-sm">
+              <p className="font-bold text-sm">
+                🤖 {m.sender_name}
+                <span className="text-stone-400 font-normal"> → to {m.conversation_partner} · {new Date(m.created_at).toLocaleString()}</span>
+              </p>
+              <p className="text-sm text-stone-600 mt-1 bg-stone-50 rounded-lg px-3 py-2">"{m.body}"</p>
+              <p className="text-xs text-stone-400 mt-2">Original content removed automatically — an open report was filed on behalf of the sender.</p>
             </div>
           ))}
         </div>

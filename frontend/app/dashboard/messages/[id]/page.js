@@ -83,6 +83,9 @@ export default function ChatPage() {
                 <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
                   mine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-white text-stone-800 rounded-bl-sm border border-stone-200"
                 }`}>
+                  {m.flagged && (
+                    <p className="text-[10px] font-bold mb-1 opacity-80">⚠️ Auto-filtered — content not allowed on Pamoja was removed</p>
+                  )}
                   <p className="leading-relaxed whitespace-pre-wrap">{m.body}</p>
                   <p className={`text-[10px] mt-1 ${mine ? "text-emerald-100" : "text-stone-400"}`}>
                     {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

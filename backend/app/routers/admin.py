@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Booking, CompanionProfile, Report, User
+from ..models import (Booking, CompanionProfile, Conversation, Message, Report,
+                      User)
 from ..schemas import AdminStatsOut
 from ..security import require_admin
 
@@ -115,6 +116,31 @@ def list_reports(status: str = "open", db: Session = Depends(get_db),
             "created_at": r.created_at.isoformat(),
         }
         for r in reports
+    ]
+
+
+@router.get("/flagged-messages")
+def flagged_messages(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    rows = (
+        db.query(Message, Conversation, User)
+        .join(Conversation, Message.conversation_id == Conversation.id)
+        .join(User, Message.sender_id == User.id)
+        .filter(Message.flagged.is_(True))
+        .order_by(Message.created_at.desc())
+        .all()
+    )
+    return [
+        {
+            "id": m.id,
+            "sender_id": m.sender_id,
+            "sender_name": u.name,
+            "body": m.body,
+            "conversation_partner": (
+                c.user_b.name if c.user_a_id == m.sender_id else c.user_a.name
+            ),
+            "created_at": m.created_at.isoformat(),
+        }
+        for m, c, u in rows
     ]
 
 

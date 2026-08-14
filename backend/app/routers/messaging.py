@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import Block, Booking, Conversation, Message, User
+from ..moderation import flag_message
 from ..schemas import ConversationCreateIn, ConversationOut, MessageCreateIn, MessageOut
 from ..security import get_current_user
 
@@ -126,7 +127,13 @@ def send_message(conversation_id: int, body: MessageCreateIn,
     if blocked:
         raise HTTPException(status_code=403, detail="Messaging is not possible with this user")
 
-    message = Message(conversation_id=conversation_id, sender_id=user.id, body=body.body)
+    body_text, terms = flag_message(db, user, body.body)
+    message = Message(
+        conversation_id=conversation_id,
+        sender_id=user.id,
+        body=body_text,
+        flagged=bool(terms),
+    )
     db.add(message)
     db.commit()
     db.refresh(message)

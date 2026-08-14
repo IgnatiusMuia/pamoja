@@ -27,7 +27,7 @@
 6. ~~Availability: real calendar (block out dates, time slots) + booking conflict guard.~~ ✅ light version done — start-time picker on booking, availability-window validation, overlapping-booking guard.
 
 **Month 3 — Safety & growth**
-7. AI moderation: keyword flagging on profiles/messages, image safety check.
+7. ~~AI moderation: keyword flagging on profiles/messages, image safety check.~~ ✅ keyword layer done — auto-censor banned terms in chat (EN + Swahili/Sheng), auto-file reports, profile text scan on save, admin "Auto-filtered messages" queue. Image checks still pending.
 8. ID verification: KYC via government ID upload (manual + OCR later).
 9. Notifications: in-app + email digests; companion promo page (SEO landing per city).
 10. Admin 2.0: analytics, dispute resolution, refund/commission ledger.

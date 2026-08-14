@@ -166,6 +166,7 @@ class MessageOut(BaseModel):
     id: int
     sender_id: int
     body: str
+    flagged: bool = False
     read_at: Optional[datetime] = None
     created_at: datetime
 

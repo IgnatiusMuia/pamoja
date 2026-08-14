@@ -113,6 +113,7 @@ class Message(Base):
     conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False)
     sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     body = Column(Text, nullable=False)
+    flagged = Column(Boolean, default=False)
     read_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

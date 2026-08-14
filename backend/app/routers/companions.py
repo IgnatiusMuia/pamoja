@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
 from ..models import Booking, CompanionProfile, Photo, Review, User
+from ..moderation import scan
 from ..schemas import (CompanionOut, CompanionProfileUpdateIn, PhotoIn, PhotoOut,
                        ReviewOut)
 from ..security import get_current_user
@@ -223,6 +224,18 @@ def update_companion_profile(
         raise HTTPException(status_code=404, detail="Companion profile not found")
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(cp, field, value)
+
+    combined = " ".join(filter(None, [cp.tagline or "", cp.description or ""]))
+    found = scan(combined)
+    if found:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Your profile mentions content that isn't allowed on Pamoja — we're a strictly "
+                "platonic platform. Remove the disallowed wording and save again."
+            ),
+        )
     db.commit()
     db.refresh(cp)
     return _companion_out(cp)
