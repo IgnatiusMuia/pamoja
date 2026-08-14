@@ -146,6 +146,7 @@ export default function BookingDetailPage() {
             <p className="text-xs font-bold text-stone-400 uppercase">Date & time</p>
             <p className="font-semibold mt-1">
               📅 {new Date(booking.booking_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              {booking.start_time && <> at {booking.start_time}</>}
             </p>
             <p className="text-sm text-stone-500 mt-0.5">Duration: {booking.hours} hour{booking.hours > 1 ? "s" : ""}</p>
           </div>

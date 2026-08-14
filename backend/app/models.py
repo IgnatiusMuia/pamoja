@@ -76,6 +76,7 @@ class Booking(Base):
     companion_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     activity = Column(String, nullable=False)
     booking_date = Column(Date, nullable=False)
+    start_time = Column(String, nullable=True)  # "HH:MM"
     hours = Column(Float, nullable=False)
     rate_kes = Column(Integer, nullable=False)
     total_kes = Column(Integer, nullable=False)

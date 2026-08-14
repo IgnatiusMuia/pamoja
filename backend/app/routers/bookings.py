@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -12,12 +12,20 @@ from ..security import get_current_user
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
+TIME_RE = "^([01]\\d|2[0-3]):[0-5]\\d$"
+
+
+def _parse_time(t: str) -> int:
+    h, m = t.split(":")
+    return int(h) * 60 + int(m)
+
 
 def _booking_out(b: Booking) -> BookingOut:
     return BookingOut(
         id=b.id,
         activity=b.activity,
         booking_date=b.booking_date,
+        start_time=b.start_time,
         hours=b.hours,
         rate_kes=b.rate_kes,
         total_kes=b.total_kes,
@@ -29,6 +37,52 @@ def _booking_out(b: Booking) -> BookingOut:
         traveler=b.traveler,
         companion=b.companion,
     )
+
+
+def _validate_slot(db: Session, cp: CompanionProfile, booking_date: date,
+                   start_time: str | None, hours: float) -> None:
+    import re
+
+    if start_time and not re.match(TIME_RE, start_time):
+        raise HTTPException(status_code=400, detail="start_time must be HH:MM")
+    if not start_time:
+        return
+
+    start = _parse_time(start_time)
+    end = start + int(hours * 60)
+
+    window = (cp.availability or {}).get(booking_date.strftime("%a").lower())
+    if window:
+        try:
+            w_start_s, w_end_s = window.split("-")
+            w_start, w_end = _parse_time(w_start_s.strip()), _parse_time(w_end_s.strip())
+        except Exception:
+            w_start, w_end = None, None
+        if w_start is not None and (start < w_start or end > w_end):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Companion availability is {window} — pick a start time within this window",
+            )
+
+    overlap = (
+        db.query(Booking)
+        .filter(
+            Booking.companion_id == cp.user_id,
+            Booking.booking_date == booking_date,
+            Booking.status.in_(["pending", "accepted"]),
+        )
+        .all()
+    )
+    for other in overlap:
+        if not other.start_time:
+            continue
+        o_start = _parse_time(other.start_time)
+        o_end = o_start + int(other.hours * 60)
+        if start < o_end and o_start < end:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Companion already has a booking at {other.start_time} on this date",
+            )
 
 
 @router.post("", response_model=BookingOut)
@@ -45,6 +99,7 @@ def create_booking(body: BookingCreateIn, user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Booking date cannot be in the past")
     if not is_available_on(cp.availability, body.booking_date):
         raise HTTPException(status_code=400, detail="Companion is not available on this date")
+    _validate_slot(db, cp, body.booking_date, body.start_time, body.hours)
 
     total = int(cp.hourly_rate_kes * body.hours)
     commission = int(total * settings.COMMISSION_RATE)
@@ -53,6 +108,7 @@ def create_booking(body: BookingCreateIn, user: User = Depends(get_current_user)
         companion_id=body.companion_id,
         activity=body.activity,
         booking_date=body.booking_date,
+        start_time=body.start_time,
         hours=body.hours,
         rate_kes=cp.hourly_rate_kes,
         total_kes=total,

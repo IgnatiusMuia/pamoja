@@ -10,12 +10,14 @@ import { ACTIVITIES } from "@/lib/activities";
 
 const ACTIVITY_EMOJI_MAP = Object.fromEntries(ACTIVITIES.map((a) => [a.label, a.emoji]));
 
+const TIME_SLOTS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+
 export default function BookPage() {
   const { id } = useParams();
   const router = useRouter();
   const [me, setMe] = useState(null);
   const [companion, setCompanion] = useState(null);
-  const [form, setForm] = useState({ activity: "", booking_date: "", hours: 2, notes: "" });
+  const [form, setForm] = useState({ activity: "", booking_date: "", start_time: "", hours: 2, notes: "" });
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -56,6 +58,7 @@ export default function BookPage() {
           companion_id: Number(id),
           activity: form.activity,
           booking_date: form.booking_date,
+          start_time: form.start_time || null,
           hours: Number(form.hours),
           notes: form.notes || null,
         },
@@ -110,12 +113,21 @@ export default function BookPage() {
             </select>
           </label>
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             <label className="block">
               <span className="text-sm font-semibold text-stone-700">Date *</span>
               <input type="date" required value={form.booking_date}
                 onChange={(e) => setForm({ ...form, booking_date: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </label>
+            <label className="block">
+              <span className="text-sm font-semibold text-stone-700">Start time</span>
+              <select value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })}
+                className="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">No preference</option>
+                {TIME_SLOTS.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <span className="text-[11px] text-stone-400">24h format — matching {companion?.name?.split(" ")[0]}'s availability</span>
             </label>
             <label className="block">
               <span className="text-sm font-semibold text-stone-700">Number of hours *</span>

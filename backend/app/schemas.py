@@ -127,6 +127,7 @@ class BookingCreateIn(BaseModel):
     companion_id: int
     activity: str = Field(..., min_length=2)
     booking_date: date
+    start_time: Optional[str] = None  # "HH:MM"
     hours: float = Field(..., gt=0, le=12)
     notes: Optional[str] = None
 
@@ -137,6 +138,7 @@ class BookingOut(BaseModel):
     id: int
     activity: str
     booking_date: date
+    start_time: Optional[str] = None
     hours: float
     rate_kes: int
     total_kes: int

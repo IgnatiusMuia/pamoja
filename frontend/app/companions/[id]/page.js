@@ -166,18 +166,45 @@ export default function CompanionProfilePage() {
             {reviews.length === 0 ? (
               <p className="text-stone-400 text-sm">No reviews yet — be the first to book and review!</p>
             ) : (
-              <div className="space-y-4">
-                {reviews.map((r) => (
-                  <div key={r.id} className="border-b border-stone-100 pb-4 last:border-0 last:pb-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-sm text-stone-700">{r.reviewer_name || "Verified member"}</span>
-                      <Stars rating={r.rating} />
-                    </div>
-                    {r.comment && <p className="mt-2 text-sm text-stone-600 leading-relaxed">{r.comment}</p>}
-                    <p className="mt-1 text-xs text-stone-400">{new Date(r.created_at).toLocaleDateString()}</p>
+              <>
+                <div className="flex items-start gap-6 mb-5 bg-gradient-to-r from-emerald-50 to-amber-50 rounded-xl p-4">
+                  <div className="text-center shrink-0">
+                    <div className="text-4xl font-extrabold text-emerald-700">{c.rating_avg || "—"}</div>
+                    <Stars rating={c.rating_avg} />
+                    <p className="text-[11px] text-stone-400 mt-1">{c.rating_count} review{c.rating_count !== 1 ? "s" : ""}</p>
                   </div>
-                ))}
-              </div>
+                  <div className="w-full space-y-1">
+                    {[5, 4, 3, 2, 1].map((star) => {
+                      const n = reviews.filter((r) => r.rating === star).length;
+                      const pct = reviews.length ? Math.round((n / reviews.length) * 100) : 0;
+                      return (
+                        <div key={star} className="flex items-center gap-2 text-xs">
+                          <span className="w-4 text-stone-500 font-semibold shrink-0">{star}</span>
+                          <div className="flex-1 h-2.5 bg-stone-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-emerald-500 to-amber-400 rounded-full"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className="w-8 text-right text-stone-400">{n}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {reviews.map((r) => (
+                    <div key={r.id} className="border-b border-stone-100 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm text-stone-700">{r.reviewer_name || "Verified member"}</span>
+                        <Stars rating={r.rating} />
+                      </div>
+                      {r.comment && <p className="mt-2 text-sm text-stone-600 leading-relaxed">{r.comment}</p>}
+                      <p className="mt-1 text-xs text-stone-400">{new Date(r.created_at).toLocaleDateString()}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
