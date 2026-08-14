@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #faf6f0;
+  --color-sunset: #fb923c;
+  --color-sunset-deep: #ea580c;
+  --color-savanna: #b45309;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--color-cream);
+}
+
+::selection {
+  background: #fbbf24;
+  color: #1c1917;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@utility text-gradient-warm {
+  background-image: linear-gradient(90deg, #059669, #0d9488 50%, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility btn-primary {
+  background-image: linear-gradient(135deg, #059669, #0d9488);
+  color: white;
+  font-weight: 700;
+  border-radius: 0.9rem;
+  box-shadow: 0 8px 20px -8px rgb(5 150 105 / 0.5);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -8px rgb(5 150 105 / 0.6);
+    filter: brightness(1.05);
+  }
+}
+
+@utility btn-cta {
+  background-image: linear-gradient(135deg, #f97316, #f59e0b);
+  color: white;
+  font-weight: 700;
+  border-radius: 0.9rem;
+  box-shadow: 0 8px 20px -8px rgb(249 115 22 / 0.5);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -8px rgb(249 115 22 / 0.6);
+  }
+}
+
+@utility card-warm {
+  background: white;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(231 229 228);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 16px 40px -16px rgb(12 116 90 / 0.25);
+    border-color: rgb(110 231 183 / 0.6);
+  }
+}

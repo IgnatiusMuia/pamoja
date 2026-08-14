@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+pamoja.db
+.env
+.DS_Store

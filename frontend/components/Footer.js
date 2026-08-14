@@ -1,0 +1,50 @@
+import Link from "next/link";
+
+export default function Footer() {
+  return (
+    <footer className="mt-auto bg-stone-950 text-stone-300 relative">
+      <div className="h-1 bg-gradient-to-r from-emerald-600 via-teal-500 to-amber-500" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="bg-gradient-to-br from-emerald-500 to-teal-400 text-white font-extrabold rounded-xl px-2.5 py-1.5 shadow-md">P</span>
+            <span className="font-extrabold text-xl text-white">Pamoja<span className="text-gradient-warm">.</span></span>
+          </div>
+          <p className="text-sm text-stone-400">
+            Kenya's platform for platonic travel companionship. Meet locals, explore cities, make friends — strictly social, always respectful.
+          </p>
+        </div>
+        <div>
+          <h4 className="font-bold text-white mb-3">Explore</h4>
+          <ul className="space-y-2 text-sm">
+            <li><Link className="hover:text-emerald-400" href="/search">Find a Companion</Link></li>
+            <li><Link className="hover:text-emerald-400" href="/activities">Activities</Link></li>
+            <li><Link className="hover:text-emerald-400" href="/become-companion">Become a Companion</Link></li>
+            <li><Link className="hover:text-emerald-400" href="/how-it-works">How It Works</Link></li>
+            <li><Link className="hover:text-emerald-400" href="/pricing">Pricing & Commission</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-bold text-white mb-3">Trust & Safety</h4>
+          <ul className="space-y-2 text-sm">
+            <li><Link className="hover:text-emerald-400" href="/safety">Safety & Code of Conduct</Link></li>
+            <li><Link className="hover:text-emerald-400" href="/guidelines">Community Guidelines</Link></li>
+            <li><Link className="hover:text-emerald-400" href="/privacy">Privacy Policy</Link></li>
+            <li><Link className="hover:text-emerald-400" href="/terms">Terms of Service</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-bold text-white mb-3">Contact</h4>
+          <ul className="space-y-2 text-sm text-stone-400">
+            <li>📧 support@pamoja.ke</li>
+            <li>📍 Nairobi, Kenya</li>
+            <li className="pt-2 text-stone-500">Built with ❤️ in Kenya</li>
+          </ul>
+        </div>
+      </div>
+      <div className="border-t border-stone-800 py-4 text-center text-xs text-stone-500">
+        © {new Date().getFullYear()} Pamoja. Strictly platonic companionship. No dating, no romance, no adult services — ever.
+      </div>
+    </footer>
+  );
+}
