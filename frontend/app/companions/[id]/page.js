@@ -7,7 +7,7 @@ import Avatar from "@/components/Avatar";
 import FavHeart from "@/components/FavHeart";
 import Stars from "@/components/Stars";
 import { api } from "@/lib/api";
-import { isLoggedIn } from "@/lib/auth";
+import { getToken, isLoggedIn } from "@/lib/auth";
 import { activityLabel, activityEmoji } from "@/lib/activities";
 
 const DAY_LABELS = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
@@ -106,7 +106,7 @@ export default function CompanionProfilePage() {
                 }
                 if (confirm(`Block ${c.name}? You won't be able to message each other.`)) {
                   try {
-                    await api("/blocks", { method: "POST", token: localStorage.getItem("pamoja_token"), body: { blocked_id: c.id } });
+                    await api("/blocks", { method: "POST", token: getToken(), body: { blocked_id: c.id } });
                     alert("User blocked.");
                   } catch (e) {
                     alert(e.message);
