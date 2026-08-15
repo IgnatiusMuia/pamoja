@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import DashTabs from "@/components/DashTabs";
 import { api } from "@/lib/api";
-import { getToken, requireAuth } from "@/lib/auth";
+import { getToken, requireAuth, setUser } from "@/lib/auth";
 
 export default function ProfilePage() {
   const [me, setMe] = useState(null);
@@ -47,7 +47,7 @@ export default function ProfilePage() {
           languages: form.languages ? form.languages.split(",").map((s) => s.trim()).filter(Boolean) : [],
         },
       });
-      localStorage.setItem("pamoja_user", JSON.stringify(updated));
+      setUser(updated);
       setMe(updated);
       setSaved(true);
     } catch (e) {

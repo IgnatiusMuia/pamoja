@@ -106,10 +106,12 @@ End-to-end smoke test (needs the live stack — `./start.sh`):
 
 ```bash
 FRONTEND=http://localhost:3000 python3 scripts/smoke.py   # 20 checks, exit 0 = green
+node scripts/client-token-flow.mjs                        # token refresh/retry logic (real frontend lib)
 ```
 
 Covers: health, registration, search, booking → accept → complete → review, messaging,
-block/unblock, reports, admin.
+block/unblock, reports, admin — plus client-side access-token refresh (401 → refresh → retry,
+logout on failure).
 
 Quick manual smoke check (book → accept → message → complete → review → report → admin):
 

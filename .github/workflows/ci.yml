@@ -44,3 +44,8 @@ jobs:
           curl -fsS http://127.0.0.1:8000/health
       - name: Run end-to-end smoke test
         run: python ../scripts/smoke.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run client token-flow test (real frontend lib)
+        run: node ../scripts/client-token-flow.mjs
