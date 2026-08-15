@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 pamoja.db
+test.db
 uploads/
 .env
 .DS_Store

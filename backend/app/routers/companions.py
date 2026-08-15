@@ -2,8 +2,9 @@ from datetime import date, datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from sqlalchemy import or_
+from sqlalchemy import cast, or_
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.types import Text
 
 from ..config import settings
 from ..database import get_db
@@ -154,17 +155,17 @@ def search_companions(
     if interests:
         want = [i.strip() for i in interests.split(",") if i.strip()]
         for w in want:
-            q = q.filter(User.interests.astype("text").ilike(f"%{w}%"))
+            q = q.filter(cast(User.interests, Text).ilike(f"%{w}%"))
     if languages:
         want = [l.strip() for l in languages.split(",") if l.strip()]
         for w in want:
-            q = q.filter(User.languages.astype("text").ilike(f"%{w}%"))
+            q = q.filter(cast(User.languages, Text).ilike(f"%{w}%"))
     if max_rate:
         q = q.filter(CompanionProfile.hourly_rate_kes <= max_rate)
     if min_rating:
         q = q.filter(CompanionProfile.rating_avg >= min_rating)
     if activity:
-        q = q.filter(CompanionProfile.activity_types.astype("text").ilike(f"%{activity}%"))
+        q = q.filter(cast(CompanionProfile.activity_types, Text).ilike(f"%{activity}%"))
 
     results = q.all()
     if date:
