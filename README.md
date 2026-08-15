@@ -31,7 +31,7 @@ Pamoja/
 │   ├── requirements.txt
 │   └── .env.example
 └── frontend/                # Next.js app
-    ├── app/                 # 23 routes (public + dashboard + admin)
+    ├── app/                 # 25 routes (public + dashboard + admin)
     ├── components/          # Navbar, Footer, cards, stars, avatar, tabs
     └── lib/                 # api.js client, auth.js token helpers
 ```
@@ -78,23 +78,25 @@ Open http://localhost:3000
 - [x] Saved companions — heart to save anywhere, manage list on the dashboard
 - [x] Activities showcase page (/activities) — Kenya-adapted catalogue with descriptions
 - [x] Public companion profiles: bio, interests, languages, availability, reviews, hourly rate (KSH)
-- [x] Booking flow: request → accept / decline → completed / cancelled
+- [x] Booking flow: request → accept / decline → completed / cancelled, time-slot conflict guard
 - [x] Transparent pricing: rate × hours, 15% commission, companion payout shown
-- [x] In-app messaging (all conversations on-platform; block-aware)
+- [x] In-app messaging (all conversations on-platform; block-aware, WebSocket live chat)
 - [x] Two-way reviews after completed bookings
 - [x] Safety: report, block/unblock, emergency contact, manual companion approval, admin panel
 - [x] Companion setup: own rate, activities, weekly availability
+- [x] Photo uploads (local storage, set-primary/delete, avatar sync) + keyword moderation (chat + profiles, auto-reports)
 - [ ] Payments (M-Pesa Daraja / Stripe) — interface designed, ready to plug in
-- [ ] Photo uploads (Cloudinary), email (Resend), WebSockets, AI message moderation
+- [ ] Cloudinary uploads, email (Resend), AI-powered moderation
 
 ## Tests / verification
 
-Automated API suite (70 tests: auth, companions & search, bookings, favorites, messaging +
-WebSocket chat, moderation, notifications, photos, safety, admin):
+Automated API suite (94 tests — auth, companions & search, bookings, favorites, messaging +
+WebSocket chat, moderation, notifications, photos, safety, admin; 98% coverage):
 
 ```bash
 cd backend
-.venv/bin/python -m pytest        # green: 70 passed
+.venv/bin/python -m pytest        # green: 94 passed
+.venv/bin/python -m pytest --cov=app   # coverage report (98%)
 ```
 
 CI runs the suite on every push/PR (`.github/workflows/ci.yml`).
