@@ -1,9 +1,11 @@
 from datetime import date, datetime
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
+from ..config import settings
 from ..database import get_db
 from ..models import Booking, CompanionProfile, Photo, Review, User
 from ..moderation import scan
@@ -253,6 +255,81 @@ def add_photo(body: PhotoIn, user: User = Depends(get_current_user), db: Session
     db.refresh(photo)
     return [PhotoOut.model_validate(p) for p in sorted(
         db.query(Photo).filter(Photo.user_id == user.id).all(), key=lambda p: p.position)]
+
+
+def _saved_photos(db: Session, user: User) -> list[PhotoOut]:
+    return [PhotoOut.model_validate(p) for p in sorted(
+        db.query(Photo).filter(Photo.user_id == user.id).all(), key=lambda p: p.position)]
+
+
+@router.post("/profile/photos/upload", response_model=list[PhotoOut])
+def upload_photo(
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    import uuid
+
+    ext = Path(file.filename or "").suffix.lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
+        raise HTTPException(status_code=400, detail="Only JPG, PNG or WEBP images are allowed")
+    contents = file.file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image must be 5MB or smaller")
+
+    uploads_dir = Path(settings.UPLOAD_DIR)
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    name = f"u{user.id}_{uuid.uuid4().hex[:10]}{ext}"
+    (uploads_dir / name).write_bytes(contents)
+
+    url = f"/uploads/{name}"
+    if not user.photos:
+        user.avatar_url = url
+    photo = Photo(user_id=user.id, url=url, is_primary=not user.photos,
+                  position=len(user.photos))
+    db.add(photo)
+    db.commit()
+    return _saved_photos(db, user)
+
+
+@router.post("/profile/photos/{photo_id}/primary", response_model=list[PhotoOut])
+def make_primary(photo_id: int, user: User = Depends(get_current_user),
+                 db: Session = Depends(get_db)):
+    photo = (
+        db.query(Photo)
+        .filter(Photo.id == photo_id, Photo.user_id == user.id)
+        .first()
+    )
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    for p in user.photos:
+        p.is_primary = False
+    photo.is_primary = True
+    user.avatar_url = photo.url
+    db.commit()
+    return _saved_photos(db, user)
+
+
+@router.delete("/profile/photos/{photo_id}", response_model=list[PhotoOut])
+def delete_photo(photo_id: int, user: User = Depends(get_current_user),
+                 db: Session = Depends(get_db)):
+    photo = (
+        db.query(Photo)
+        .filter(Photo.id == photo_id, Photo.user_id == user.id)
+        .first()
+    )
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    if photo.is_primary:
+        remaining = [p for p in user.photos if p.id != photo_id]
+        if remaining:
+            remaining[0].is_primary = True
+            user.avatar_url = remaining[0].url
+        else:
+            user.avatar_url = None
+    db.delete(photo)
+    db.commit()
+    return _saved_photos(db, user)
 
 
 @router.get("/me/companion", response_model=CompanionOut)

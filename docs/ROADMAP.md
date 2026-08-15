@@ -19,10 +19,10 @@
 1. Payments: Safaricom Daraja (M-Pesa STK push, paybill) + Stripe for international cards.
    Replace the "payment coming soon" notes; hold commission at settlement, release payouts.
 2. Email: Resend transactional mail (verification, booking notifications).
-3. Photo uploads via Cloudinary (free tier); profile photo required before companion approval.
+3. ~~Photo uploads via Cloudinary (free tier); profile photo required before companion approval.~~ ✅ local uploads live (`/profile/photos/upload`, 5MB cap, JPG/PNG/WEBP, set-main/delete, avatar auto-promotion, static serving via `/uploads`). Swap storage driver to Cloudinary at deploy time.
 
 **Month 2 — Scale & speed**
-4. WebSockets for instant chat (replace 5-second polling).
+4. ~~WebSockets for instant chat (replace 5-second polling).~~ ✅ live — `/conversations/ws/{id}` with token auth, moderation passes through WS, dual-client broadcast, REST-polling fallback in the UI.
 5. ~~Search: add rating filters, saved companions/bookmarks, city autocomplete.~~ ✅ done — min-rating filter, city autocomplete (datalist), favorites/saved companions (cards + `/dashboard/saved`).
 6. ~~Availability: real calendar (block out dates, time slots) + booking conflict guard.~~ ✅ light version done — start-time picker on booking, availability-window validation, overlapping-booking guard.
 

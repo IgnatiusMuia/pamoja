@@ -1,10 +1,12 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+import jwt
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from ..database import get_db
+from ..config import settings
+from ..database import SessionLocal, get_db
 from ..models import Block, Booking, Conversation, Message, User
 from ..moderation import flag_message
 from ..routers.notifications import notify
@@ -12,6 +14,9 @@ from ..schemas import ConversationCreateIn, ConversationOut, MessageCreateIn, Me
 from ..security import get_current_user
 
 router = APIRouter(prefix="/conversations", tags=["messaging"])
+
+# Live chat: keyed by (user_id, conversation_id)
+_active: dict[tuple[int, int], WebSocket] = {}
 
 
 def _other_user(conversation: Conversation, me: User) -> User:
@@ -146,3 +151,84 @@ def send_message(conversation_id: int, body: MessageCreateIn,
     )
     db.commit()
     return message
+
+
+def _ws_user(token: str, db: Session) -> User | None:
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+    except jwt.PyJWTError:
+        return None
+    if payload.get("type") != "access":
+        return None
+    user = db.get(User, int(payload["sub"]))
+    if not user or user.status != "active":
+        return None
+    return user
+
+
+@router.websocket("/ws/{conversation_id}")
+async def ws_chat(websocket: WebSocket, conversation_id: int, token: str = ""):
+    await websocket.accept()
+    user = None
+    db = SessionLocal()
+    try:
+        user = _ws_user(token, db)
+        conversation = db.get(Conversation, conversation_id)
+        if not user or not conversation or user.id not in (
+            conversation.user_a_id, conversation.user_b_id
+        ):
+            await websocket.close(code=4401)
+            return
+
+        key = (user.id, conversation_id)
+        _active[key] = websocket
+        try:
+            while True:
+                data = await websocket.receive_json()
+                if data.get("type") == "ping":
+                    continue
+                body = (data.get("body") or "").strip()
+                if not body:
+                    continue
+
+                body_text, terms = flag_message(db, user, body)
+                message = Message(
+                    conversation_id=conversation_id,
+                    sender_id=user.id,
+                    body=body_text,
+                    flagged=bool(terms),
+                )
+                db.add(message)
+                db.commit()
+                db.refresh(message)
+
+                other_id = (
+                    conversation.user_b_id
+                    if user.id == conversation.user_a_id
+                    else conversation.user_a_id
+                )
+                notify(
+                    db, other_id, "message",
+                    f"New message from {user.name}",
+                    body_text[:120] + ("…" if len(body_text) > 120 else ""),
+                    link=f"/dashboard/messages/{conversation_id}",
+                )
+                db.commit()
+
+                payload = {
+                    "id": message.id,
+                    "sender_id": message.sender_id,
+                    "body": message.body,
+                    "flagged": message.flagged,
+                    "created_at": message.created_at.isoformat(),
+                }
+                for uid in (conversation.user_a_id, conversation.user_b_id):
+                    sock = _active.get((uid, conversation_id))
+                    if sock:
+                        await sock.send_json(payload)
+        except WebSocketDisconnect:
+            pass
+    finally:
+        if user:
+            _active.pop((user.id, conversation_id), None)
+        db.close()

@@ -19,6 +19,51 @@ export default function CompanionProfilePage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function onUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/profile/photos/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: fd,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Upload failed");
+      }
+      setProfile({ ...profile, photos: await res.json() });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function setPrimary(photoId) {
+    try {
+      const photos = await api(`/profile/photos/${photoId}/primary`, { method: "POST", token: getToken() });
+      setProfile({ ...profile, photos });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function removePhoto(photoId) {
+    try {
+      const photos = await api(`/profile/photos/${photoId}`, { method: "DELETE", token: getToken() });
+      setProfile({ ...profile, photos });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   useEffect(() => {
     if (!requireAuth()) return;
@@ -181,9 +226,37 @@ export default function CompanionProfilePage() {
         </div>
 
         <div className="rounded-xl bg-stone-50 border border-stone-200 p-4 text-sm text-stone-600">
-          <p className="font-bold text-stone-700 mb-1">📸 Photos</p>
-          <p>Photo uploads arrive in v2 (Cloudinary integration). For now, add an avatar URL on the{" "}
-            <Link href="/dashboard/profile" className="text-emerald-700 font-bold">profile page</Link>.</p>
+          <p className="font-bold text-stone-700 mb-3">📸 Photos</p>
+          <div className="flex flex-wrap gap-3">
+            {profile?.photos?.map((p) => (
+              <div key={p.id} className="relative group">
+                <img
+                  src={`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}${p.url}`}
+                  alt="Uploaded"
+                  className="h-24 w-24 object-cover rounded-xl border-2 border-white shadow ${p.is_primary ? 'border-emerald-500' : ''}"
+                />
+                {p.is_primary && (
+                  <span className="absolute top-1 left-1 bg-emerald-600 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">MAIN</span>
+                )}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-1.5">
+                  {!p.is_primary && (
+                    <button type="button" onClick={() => setPrimary(p.id)}
+                      className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg">Set main</button>
+                  )}
+                  <button type="button" onClick={() => removePhoto(p.id)}
+                    className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg">Delete</button>
+                </div>
+              </div>
+            ))}
+            <label className="h-24 w-24 rounded-xl border-2 border-dashed border-stone-300 hover:border-emerald-400 hover:bg-emerald-50 transition-colors cursor-pointer flex flex-col items-center justify-center text-stone-400">
+              <span className="text-xl">+</span>
+              <span className="text-[10px] font-bold">Upload</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                onChange={onUpload} disabled={uploading} />
+            </label>
+          </div>
+          <p className="text-xs text-stone-400 mt-2">JPG, PNG or WEBP · max 5MB. Your main photo becomes your avatar.</p>
+          {uploading && <p className="text-xs text-emerald-700 font-bold mt-1">Uploading…</p>}
         </div>
 
         <button type="submit" disabled={busy}

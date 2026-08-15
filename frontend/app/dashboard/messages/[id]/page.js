@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import DashTabs from "@/components/DashTabs";
 import Avatar from "@/components/Avatar";
-import { api } from "@/lib/api";
+import { API_BASE_URL, api } from "@/lib/api";
 import { getToken, requireAuth } from "@/lib/auth";
+
+const WS_BASE = API_BASE_URL.replace(/^http/, "ws");
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -14,7 +16,16 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [body, setBody] = useState("");
   const [error, setError] = useState(null);
+  const [live, setLive] = useState(false);
+  const wsRef = useRef(null);
   const bottomRef = useRef(null);
+
+  function replaceMessage(m) {
+    setMessages((prev) => {
+      if (prev.some((x) => x.id === m.id)) return prev;
+      return [...prev, { ...m, created_at: m.created_at + (m.created_at.endsWith("Z") ? "" : "Z") }];
+    });
+  }
 
   async function load() {
     const data = await api(`/conversations/${id}/messages`, { token: getToken() });
@@ -23,13 +34,53 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!requireAuth()) return;
+
+    let polling = null;
     api("/auth/me", { token: getToken() })
       .then(setMe)
-      .then(() => load())
+      .then(load)
       .catch((e) => setError(e.message));
 
-    const interval = setInterval(() => load().catch(() => {}), 5000);
-    return () => clearInterval(interval);
+    const token = getToken();
+    if (token) {
+      let ws;
+      try {
+        ws = new WebSocket(`${WS_BASE}/conversations/ws/${id}?token=${encodeURIComponent(token)}`);
+      } catch {
+        ws = null;
+      }
+      if (ws) {
+        ws.onopen = () => {
+          setLive(true);
+          if (polling) {
+            clearInterval(polling);
+            polling = null;
+          }
+        };
+        ws.onmessage = (ev) => {
+          try {
+            const m = JSON.parse(ev.data);
+            if (m.id) replaceMessage(m);
+          } catch {
+            // ignore malformed frames
+          }
+        };
+        ws.onclose = () => {
+          setLive(false);
+        };
+        ws.onerror = () => {
+          ws.close();
+        };
+        wsRef.current = ws;
+      }
+    }
+
+    polling = setInterval(() => load().catch(() => {}), 5000);
+
+    return () => {
+      if (polling) clearInterval(polling);
+      wsRef.current?.close();
+    };
   }, [id]);
 
   useEffect(() => {
@@ -41,6 +92,11 @@ export default function ChatPage() {
     const text = body.trim();
     if (!text) return;
     setBody("");
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ body: text }));
+      return;
+    }
     try {
       await api(`/conversations/${id}/messages`, { method: "POST", token: getToken(), body: { body: text } });
       load();
@@ -72,6 +128,11 @@ export default function ChatPage() {
           <p className="text-sm text-stone-500">
             💬 Remember: Pamoja is <strong>strictly platonic</strong> — keep it friendly and respectful.
           </p>
+          <span className={`ml-auto text-[11px] font-bold px-2.5 py-1 rounded-full ${
+            live ? "bg-emerald-100 text-emerald-700" : "bg-stone-200 text-stone-500"
+          }`}>
+            {live ? "● Live" : "Polling…"}
+          </span>
         </div>
 
         <div className="grow overflow-y-auto p-5 space-y-3 bg-stone-50/50">
