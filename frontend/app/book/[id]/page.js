@@ -42,10 +42,27 @@ export default function BookPage() {
   const commission = Math.round(total * 0.15);
   const payout = total - commission;
 
+  const weekdayFor = form.booking_date
+    ? new Date(`${form.booking_date}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" }).toLowerCase()
+    : null;
+  const windowStr = companion?.availability?.[weekdayFor] || null;
+  const [wStart, wEnd] = windowStr ? windowStr.split("-").map((s) => s.trim()) : [null, null];
+  const allowedSlots = TIME_SLOTS.filter((t) => !wStart || (t >= wStart && t <= wEnd));
+  const companionUnavailable = !!weekdayFor && !windowStr;
+  const timeInvalid = !!form.start_time && !allowedSlots.includes(form.start_time);
+
   async function submit(e) {
     e.preventDefault();
     if (!form.activity || !form.booking_date) {
       setError("Choose an activity and a date.");
+      return;
+    }
+    if (companionUnavailable) {
+      setError("This companion is not available on the selected day.");
+      return;
+    }
+    if (timeInvalid) {
+      setError(`Pick a start time within ${companion?.name?.split(" ")[0]}'s availability window (${windowStr}).`);
       return;
     }
     setBusy(true);
@@ -117,17 +134,26 @@ export default function BookPage() {
             <label className="block">
               <span className="text-sm font-semibold text-stone-700">Date *</span>
               <input type="date" required value={form.booking_date}
+                min={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setForm({ ...form, booking_date: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              {companionUnavailable && (
+                <span className="mt-1 block text-[11px] font-semibold text-amber-600">
+                  {companion?.name?.split(" ")[0]} doesn't work on this day — pick another date.
+                </span>
+              )}
             </label>
             <label className="block">
               <span className="text-sm font-semibold text-stone-700">Start time</span>
-              <select value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })}
+              <select value={form.start_time}
+                onChange={(e) => setForm({ ...form, start_time: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">No preference</option>
-                {TIME_SLOTS.map((t) => <option key={t} value={t}>{t}</option>)}
+                {allowedSlots.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
-              <span className="text-[11px] text-stone-400">24h format — matching {companion?.name?.split(" ")[0]}'s availability</span>
+              <span className="text-[11px] text-stone-400">
+                Available window {windowStr ? `${windowStr} (${weekdayFor})` : "varies by day"}
+              </span>
             </label>
             <label className="block">
               <span className="text-sm font-semibold text-stone-700">Number of hours *</span>
