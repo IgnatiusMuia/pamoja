@@ -225,3 +225,177 @@ def test_cannot_review_pending_booking(client):
         json={"booking_id": b["id"], "rating": 5},
     )
     assert resp.status_code == 400
+
+
+def _next_weekday_following_week() -> str:
+    return (date.fromisoformat(_next_weekday()) + timedelta(days=7)).isoformat()
+
+
+def _next_weekday_two_weeks_out() -> str:
+    return (date.fromisoformat(_next_weekday()) + timedelta(days=14)).isoformat()
+
+
+def test_booking_decline_flow(client):
+    from .conftest import login
+
+    _, t_headers = new_traveler(client)
+    c_headers = login(client, "wanjiru.kamau@pamoja.ke")
+    b = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": COMPANION_ID,
+            "activity": "Coffee House Hangouts",
+            "booking_date": _next_weekday(),
+            "start_time": "09:00",
+            "hours": 1,
+        },
+    ).json()
+
+    declined = client.post(f"/bookings/{b['id']}/decline", headers=c_headers)
+    assert declined.status_code == 200
+    assert declined.json()["status"] == "declined"
+
+    again = client.post(f"/bookings/{b['id']}/decline", headers=c_headers)
+    assert again.status_code == 400
+    assert "Cannot update" in again.json()["detail"]
+
+    from_traveler = client.post(f"/bookings/{b['id']}/decline", headers=t_headers)
+    assert from_traveler.status_code == 403
+
+
+def test_get_booking_guards(client):
+    _, t_headers = new_traveler(client)
+    _, other_headers = new_traveler(client)
+    assert client.get("/bookings/999999", headers=t_headers).status_code == 404
+
+    b = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": COMPANION_ID,
+            "activity": "City Tours",
+            "booking_date": _next_weekday(),
+            "start_time": "16:00",
+            "hours": 1,
+        },
+    ).json()
+    assert client.get(f"/bookings/{b['id']}", headers=t_headers).status_code == 200
+    assert client.get(f"/bookings/{b['id']}", headers=other_headers).status_code == 403
+
+
+def test_my_bookings_scoped_by_role(client):
+    from .conftest import login
+
+    _, t_headers = new_traveler(client)
+    c_headers = login(client, "wanjiru.kamau@pamoja.ke")
+    b = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": COMPANION_ID,
+            "activity": "Dining Out",
+            "booking_date": _next_weekday_following_week(),
+            "start_time": "09:00",
+            "hours": 1,
+        },
+    ).json()
+
+    trav_ids = {x["id"] for x in client.get("/bookings", headers=t_headers).json()}
+    comp_ids = {x["id"] for x in client.get("/bookings", headers=c_headers).json()}
+    assert b["id"] in trav_ids and b["id"] in comp_ids
+
+    other_traveler = client.get("/bookings", headers=login(client, "demo@pamoja.ke"))
+    assert other_traveler.status_code == 200
+    assert all(x["companion"]["id"] != 3 for x in other_traveler.json())
+
+
+def test_booking_on_unavailable_weekday(client):
+    _, t_headers = new_traveler(client)
+    sunday = _next_available("sun")
+    resp = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": COMPANION_ID,
+            "activity": "City Tours",
+            "booking_date": sunday,
+            "start_time": "10:00",
+            "hours": 2,
+        },
+    )
+    assert resp.status_code == 400
+    assert "not available" in resp.json()["detail"].lower()
+
+
+def test_booking_against_unapproved_companion(client):
+    from .conftest import register
+
+    pending = register(client, role="companion")
+    _, t_headers = new_traveler(client)
+    resp = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": pending["user"]["id"],
+            "activity": "City Tours",
+            "booking_date": _next_weekday(),
+            "start_time": "10:00",
+            "hours": 2,
+        },
+    )
+    assert resp.status_code == 400
+    assert "not available" in resp.json()["detail"].lower()
+
+
+def test_booking_without_start_time_does_not_block_later_slot(client):
+    _, t_headers = new_traveler(client)
+    client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": COMPANION_ID,
+            "activity": "City Tours",
+            "booking_date": _next_weekday_two_weeks_out(),
+            "hours": 2,
+        },
+    )
+    later = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": COMPANION_ID,
+            "activity": "Dining Out",
+            "booking_date": _next_weekday_two_weeks_out(),
+            "start_time": "10:00",
+            "hours": 1,
+        },
+    )
+    assert later.status_code == 200, later.text
+
+
+def test_review_by_non_participant_forbidden(client):
+    from .conftest import login
+
+    _, t_headers = new_traveler(client)
+    c_headers = login(client, "wanjiru.kamau@pamoja.ke")
+    b = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": COMPANION_ID,
+            "activity": "City Tours",
+            "booking_date": _next_weekday_two_weeks_out(),
+            "start_time": "12:00",
+            "hours": 1,
+        },
+    ).json()
+    client.post(f"/bookings/{b['id']}/accept", headers=c_headers)
+    client.post(f"/bookings/{b['id']}/complete", headers=t_headers)
+
+    _, stranger_headers = new_traveler(client)
+    resp = client.post(
+        "/bookings/reviews", headers=stranger_headers,
+        json={"booking_id": b["id"], "rating": 5, "comment": "intrusion"},
+    )
+    assert resp.status_code == 403

@@ -180,6 +180,20 @@ async def ws_chat(websocket: WebSocket, conversation_id: int, token: str = ""):
             await websocket.close(code=4401)
             return
 
+        other_id = (
+            conversation.user_b_id
+            if user.id == conversation.user_a_id
+            else conversation.user_a_id
+        )
+        blocked = db.query(Block).filter(
+            or_(Block.blocker_id == user.id, Block.blocked_id == user.id)
+        ).filter(
+            or_(Block.blocker_id == other_id, Block.blocked_id == other_id)
+        ).first()
+        if blocked:
+            await websocket.close(code=4403)
+            return
+
         key = (user.id, conversation_id)
         _active[key] = websocket
         try:

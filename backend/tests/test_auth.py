@@ -60,3 +60,20 @@ def test_refresh_flow(client):
     )
     assert tokens.status_code == 200
     assert tokens.json()["access_token"]
+
+
+def test_refresh_rejects_access_token(client):
+    email = f"refb-{uuid.uuid4().hex[:8]}@pamoja.ke"
+    data = register(client, email=email)
+    resp = client.post("/auth/refresh", json={"refresh_token": data["access_token"]})
+    assert resp.status_code == 401
+
+
+def test_refresh_rejects_suspended_account(client):
+    from .conftest import admin_headers
+
+    email = f"refs-{uuid.uuid4().hex[:8]}@pamoja.ke"
+    data = register(client, email=email)
+    client.post(f"/admin/users/{data['user']['id']}/suspend", headers=admin_headers(client))
+    resp = client.post("/auth/refresh", json={"refresh_token": data["refresh_token"]})
+    assert resp.status_code == 401

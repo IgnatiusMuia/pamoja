@@ -66,6 +66,68 @@ def test_admin_analytics_shape(client):
     assert 0 <= data["avg_rating"] <= 5
 
 
+def test_admin_reject_and_status_filters(client):
+    headers = admin_headers(client)
+    data = register(client, role="companion")
+
+    listed = client.get("/admin/companions?status=pending", headers=headers).json()
+    assert any(c["id"] == data["user"]["id"] for c in listed)
+
+    reject = client.post(f"/admin/companions/{data['user']['id']}/reject", headers=headers)
+    assert reject.status_code == 200
+    assert reject.json()["rejected"] is True
+
+    rejected = client.get("/admin/companions?status=rejected", headers=headers).json()
+    assert any(c["id"] == data["user"]["id"] and c["status"] == "rejected" for c in rejected)
+    not_approved = client.get("/admin/companions?status=approved", headers=headers).json()
+    assert not any(c["id"] == data["user"]["id"] for c in not_approved)
+
+    assert client.post("/admin/companions/999999/reject", headers=headers).status_code == 404
+
+
+def test_admin_suspend_unsuspend_companion(client):
+    headers = admin_headers(client)
+    data = register(client, role="companion")
+
+    sus = client.post(f"/admin/users/{data['user']['id']}/suspend", headers=headers)
+    assert sus.json()["suspended"] is True
+
+    suspended = client.get("/admin/companions?status=suspended", headers=headers).json()
+    assert any(c["id"] == data["user"]["id"] for c in suspended)
+
+    assert client.post("/admin/users/999999/suspend", headers=headers).status_code == 404
+
+    unsus = client.post(f"/admin/users/{data['user']['id']}/unsuspend", headers=headers)
+    assert unsus.json()["unsuspended"] is True
+    assert client.post("/admin/users/999999/unsuspend", headers=headers).status_code == 404
+
+    approved = client.get("/admin/companions?status=approved", headers=headers).json()
+    assert any(c["id"] == data["user"]["id"] for c in approved)
+
+
+def test_admin_approve_non_companion_404(client):
+    data, _ = new_traveler(client)
+    headers = admin_headers(client)
+    assert client.post(f"/admin/companions/{data['user']['id']}/approve", headers=headers).status_code == 404
+
+
+def test_admin_report_dismiss_and_404s(client):
+    headers = admin_headers(client)
+    _, t_headers = new_traveler(client)
+    report = client.post(
+        "/reports", headers=t_headers,
+        json={"reported_id": 3, "reason": "Spam", "details": "Spammy"},
+    ).json()
+
+    dismiss = client.post(f"/admin/reports/{report['report_id']}/dismiss", headers=headers)
+    assert dismiss.status_code == 200
+    dismissed = client.get("/admin/reports?status=dismissed", headers=headers).json()
+    assert any(r["id"] == report["report_id"] for r in dismissed)
+
+    assert client.post("/admin/reports/999999/dismiss", headers=headers).status_code == 404
+    assert client.post("/admin/reports/999999/resolve", headers=headers).status_code == 404
+
+
 def test_admin_flagged_messages(client):
     from .conftest import new_companion_user
 

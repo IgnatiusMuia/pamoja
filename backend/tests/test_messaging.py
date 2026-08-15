@@ -142,3 +142,59 @@ def test_websocket_rejects_bad_token(client):
             f"/conversations/ws/{conv['id']}?token=garbage"
         ) as ws:
             ws.receive_json()
+
+
+def test_websocket_rejects_refresh_token(client):
+    data, t_headers = new_traveler(client)
+    conv = _start_conversation(client, t_headers)
+    with pytest.raises(WebSocketDisconnect):
+        with client.websocket_connect(
+            f"/conversations/ws/{conv['id']}?token={data['refresh_token']}"
+        ) as ws:
+            ws.receive_json()
+
+
+def test_websocket_rejects_suspended_user(client):
+    from .conftest import admin_headers
+
+    _, t_headers = new_traveler(client)
+    conv = _start_conversation(client, t_headers)
+    data = client.get("/auth/me", headers=t_headers).json()
+    client.post(f"/admin/users/{data['id']}/suspend", headers=admin_headers(client))
+    with pytest.raises(WebSocketDisconnect):
+        with client.websocket_connect(
+            f"/conversations/ws/{conv['id']}?token={_token(t_headers)}"
+        ) as ws:
+            ws.receive_json()
+
+
+def test_websocket_blocked_user_rejected(client):
+    _, t_headers = new_traveler(client)
+    c_headers = login(client, "wanjiru.kamau@pamoja.ke")
+    conv = _start_conversation(client, t_headers)
+    client.post("/blocks", headers=t_headers, json={"blocked_id": COMPANION_ID})
+
+    with pytest.raises(WebSocketDisconnect) as exc:
+        with client.websocket_connect(
+            f"/conversations/ws/{conv['id']}?token={_token(t_headers)}"
+        ) as ws:
+            ws.receive_json()
+    assert exc.value.code == 4403
+
+    with pytest.raises(WebSocketDisconnect) as exc:
+        with client.websocket_connect(
+            f"/conversations/ws/{conv['id']}?token={_token(c_headers)}"
+        ) as ws:
+            ws.receive_json()
+    assert exc.value.code == 4403
+
+
+def test_websocket_skips_ping_and_empty_body(client):
+    _, t_headers = new_traveler(client)
+    conv = _start_conversation(client, t_headers)
+    with client.websocket_connect(f"/conversations/ws/{conv['id']}?token={_token(t_headers)}") as ws:
+        ws.send_json({"type": "ping"})
+        ws.send_json({"body": ""})
+        ws.send_json({"body": "after ping"})
+        echo = ws.receive_json()
+        assert echo["body"] == "after ping"

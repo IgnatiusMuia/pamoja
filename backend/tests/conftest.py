@@ -28,18 +28,17 @@ def _unique(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8]}@example.com"
 
 
-def register(client, email=None, password="password123", role="traveler", name="Test User"):
-    resp = client.post(
-        "/auth/register",
-        json={
-            "email": email or _unique("trav"),
-            "password": password,
-            "name": name,
-            "role": role,
-            "city": "Nairobi",
-            "gender": "female",
-        },
-    )
+def register(client, email=None, password="password123", role="traveler", name="Test User", **extra):
+    body = {
+        "email": email or _unique("trav"),
+        "password": password,
+        "name": name,
+        "role": role,
+        "city": "Nairobi",
+        "gender": "female",
+    }
+    body.update(extra)
+    resp = client.post("/auth/register", json=body)
     assert resp.status_code == 200, resp.text
     return resp.json()
 

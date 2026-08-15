@@ -84,3 +84,112 @@ def test_reviews_endpoint(client):
     resp = client.get("/companions/3/reviews")
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
+
+
+def test_reviews_include_reviewer_name(client):
+    reviews = client.get("/companions/4/reviews").json()
+    assert reviews
+    assert all(isinstance(r["reviewer_name"], str) and r["reviewer_name"] for r in reviews)
+
+
+def test_filter_by_interests_and_languages(client):
+    from .conftest import admin_headers, login, new_traveler
+
+    data = client.post(
+        "/auth/register",
+        json={
+            "email": "hiker.tester@pamoja.ke",
+            "password": "password123",
+            "name": "Hiker Tester",
+            "role": "companion",
+            "city": "Nairobi",
+            "gender": "male",
+            "interests": ["hiking", "photography"],
+            "languages": ["english", "kiswahili", "mandarin"],
+        },
+    ).json()
+    uid = data["user"]["id"]
+    client.post(f"/admin/companions/{uid}/approve", headers=admin_headers(client))
+
+    by_interest = client.get("/companions?interests=hiking&page_size=48").json()
+    assert any(c["id"] == uid for c in by_interest)
+    assert all("hiking" in (c["interests"] or []) for c in by_interest)
+
+    multi = client.get("/companions?interests=hiking,photography&page_size=48").json()
+    assert any(c["id"] == uid for c in multi)
+
+    by_language = client.get("/companions?languages=mandarin&page_size=48").json()
+    assert any(c["id"] == uid for c in by_language)
+    assert all("mandarin" in (c["languages"] or []) for c in by_language)
+
+
+def test_filter_by_gender(client):
+    data = client.get("/companions?gender=male&page_size=48").json()
+    assert data
+    assert all(c["gender"] == "male" for c in data)
+
+
+def test_sort_price_desc_and_newest(client):
+    data = client.get("/companions?sort=price_desc&page_size=48").json()
+    rates = [c["hourly_rate_kes"] for c in data]
+    assert rates == sorted(rates, reverse=True)
+
+    newest = client.get("/companions?sort=newest&page_size=48").json()
+    assert newest
+
+
+def test_unapproved_companion_profile_is_404(client):
+    data = client.post(
+        "/auth/register",
+        json={
+            "email": "waiting.tester@pamoja.ke",
+            "password": "password123",
+            "name": "Waiting Tester",
+            "role": "companion",
+            "city": "Nairobi",
+            "gender": "female",
+        },
+    ).json()
+    assert client.get(f"/companions/{data['user']['id']}").status_code == 404
+
+
+def test_profile_update_requires_companion_role(client):
+    from .conftest import new_traveler
+
+    _, headers = new_traveler(client)
+    resp = client.put(
+        "/profile/companion",
+        headers=headers,
+        json={"tagline": "nope"},
+    )
+    assert resp.status_code == 403
+    assert client.put("/profile/companion", json={}).status_code == 401
+
+
+def test_json_photo_add_clears_previous_primary(client):
+    from .conftest import new_companion_user
+
+    _, headers = new_companion_user(client)
+    first = client.post(
+        "/profile/photos",
+        headers=headers,
+        json={"url": "https://example.com/one.jpg", "is_primary": True},
+    ).json()
+    assert len(first) == 1 and first[0]["is_primary"] is True
+
+    second = client.post(
+        "/profile/photos",
+        headers=headers,
+        json={"url": "https://example.com/two.jpg", "is_primary": True},
+    ).json()
+    assert len(second) == 2
+    new_primary = next(p for p in second if p["is_primary"])
+    assert new_primary["url"] == "https://example.com/two.jpg"
+
+    third = client.post(
+        "/profile/photos",
+        headers=headers,
+        json={"url": "https://example.com/three.jpg", "is_primary": False},
+    ).json()
+    assert len(third) == 3
+    assert sum(1 for p in third if p["is_primary"]) == 1
