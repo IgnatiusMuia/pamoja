@@ -99,7 +99,17 @@ cd backend
 .venv/bin/python -m pytest --cov=app   # coverage report (98%)
 ```
 
-CI runs the suite on every push/PR (`.github/workflows/ci.yml`).
+CI runs the pytest suite on every push/PR (`.github/workflows/ci.yml`), then boots the API and
+runs the end-to-end smoke test.
+
+End-to-end smoke test (needs the live stack — `./start.sh`):
+
+```bash
+FRONTEND=http://localhost:3000 python3 scripts/smoke.py   # 20 checks, exit 0 = green
+```
+
+Covers: health, registration, search, booking → accept → complete → review, messaging,
+block/unblock, reports, admin.
 
 Quick manual smoke check (book → accept → message → complete → review → report → admin):
 
