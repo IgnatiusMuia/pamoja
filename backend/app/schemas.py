@@ -35,6 +35,10 @@ class UserOut(BaseModel):
     interests: list[str] = []
     languages: list[str] = []
     avatar_url: Optional[str] = None
+    phone: Optional[str] = None
+    birth_year: Optional[int] = None
+    emergency_name: Optional[str] = None
+    emergency_phone: Optional[str] = None
     is_approved: bool
     status: str
     created_at: datetime

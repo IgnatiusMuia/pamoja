@@ -89,7 +89,17 @@ Open http://localhost:3000
 
 ## Tests / verification
 
-API smoke test (book → accept → message → complete → review → report → admin):
+Automated API suite (70 tests: auth, companions & search, bookings, favorites, messaging +
+WebSocket chat, moderation, notifications, photos, safety, admin):
+
+```bash
+cd backend
+.venv/bin/python -m pytest        # green: 70 passed
+```
+
+CI runs the suite on every push/PR (`.github/workflows/ci.yml`).
+
+Quick manual smoke check (book → accept → message → complete → review → report → admin):
 
 ```bash
 cd backend
