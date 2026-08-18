@@ -129,11 +129,18 @@ Full walkthrough: see `docs/ROADMAP.md` (step 6) or the API docs at `/docs`.
 See `docs/DEPLOY.md` for the step-by-step go-live guide (Vercel + Render + Neon).
 ## Deploy (GitHub → Netlify + Render)
 
+**Live right now:** frontend at https://pamoja-300.netlify.app (pure static export,
+no server) — repo: https://github.com/IgnatiusMuia/pamoja.
+
 ### 1. Push to GitHub
 
 ```bash
 gh repo create pamoja --public --source . --push
 ```
+
+> The GitHub OAuth token needs the `workflow` scope to include
+> `.github/workflows/ci.yml`; until then the file lives locally uncommitted.
+> Run `gh auth refresh -h github.com -s workflow`, then commit it.
 
 ### 2. Backend on Render (free)
 
@@ -152,11 +159,12 @@ gh repo create pamoja --public --source . --push
 
 ```bash
 cd frontend
-npx netlify login          # browser auth once
-npx netlify init           # creates site, connects to git repo
 npx netlify env:set NEXT_PUBLIC_API_URL https://<your-api>.onrender.com
-npx netlify env:set NEXT_PUBLIC_SITE_URL https://<your-site>.netlify.app
-npx netlify deploy --prod  # or push to main (CI auto-deploys)
+npx netlify env:set NEXT_PUBLIC_SITE_URL https://pamoja-300.netlify.app
+npm run build            # static export -> out/
+npx netlify deploy --prod --dir out
 ```
+
+Deploys are pure static (no Next plugin/SSR). Redeploy after any env change.
 
 Netlify picks up `netlify.toml` + `@netlify/plugin-nextjs` automatically.
