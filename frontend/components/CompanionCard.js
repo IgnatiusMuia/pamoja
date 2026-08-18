@@ -4,8 +4,6 @@ import Link from "next/link";
 import Avatar from "./Avatar";
 import FavHeart from "./FavHeart";
 import Stars from "./Stars";
-import Scene from "./art/Scene";
-import { sceneForCity } from "./art/sceneFor";
 
 const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
@@ -22,13 +20,7 @@ export default function CompanionCard({ companion }) {
       href={`/companions/${companion.id}`}
       className="group bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 border border-stone-200/80 overflow-hidden flex flex-col hover:border-emerald-300"
     >
-      <div className="relative h-40 overflow-hidden">
-        <Scene
-          variant={sceneForCity(companion.city)}
-          uid={`cc${companion.id}`}
-          className="absolute inset-0 h-full w-full transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/60 via-transparent to-transparent" />
+      <div className="relative h-40 bg-emerald-600 flex items-center justify-center p-4">
         <FavHeart
           companionId={companion.id}
           className="absolute top-3 right-3 h-8 w-8"
@@ -43,9 +35,7 @@ export default function CompanionCard({ companion }) {
             ★ Featured
           </span>
         )}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-          <Avatar user={companion} size="lg" className="h-20 w-20 text-3xl ring-4 ring-white shadow-xl" />
-        </div>
+        <Avatar user={companion} size="lg" className="h-24 w-24 text-3xl ring-4 ring-white shadow-xl" />
       </div>
       <div className="p-5 flex flex-col gap-1.5 grow">
         <div className="flex items-start justify-between gap-2">

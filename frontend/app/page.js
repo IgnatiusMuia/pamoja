@@ -1,6 +1,4 @@
 import Link from "next/link";
-import Scene from "@/components/art/Scene";
-import { sceneForActivity } from "@/components/art/sceneFor";
 import CompanionCard from "@/components/CompanionCard";
 import { api } from "@/lib/api";
 import { ACTIVITIES } from "@/lib/activities";
@@ -68,65 +66,41 @@ export default async function Home() {
           className="absolute inset-0 opacity-40"
           style={{
             background:
-              "radial-gradient(60% 80% at 80% 20%, rgba(52,211,153,.35) 0%, rgba(16,185,129,.12) 45%, transparent 70%)",
+              "radial-gradient(60% 80% at 50% 0%, rgba(52,211,153,.35) 0%, rgba(16,185,129,.12) 45%, transparent 70%)",
           }}
         />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 lg:py-24">
-          <div className="grid lg:grid-cols-[1.1fr_1fr] items-center gap-12">
-            <div className="text-center lg:text-left">
-              <span className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-emerald-50 text-sm font-semibold px-4 py-2 rounded-full mb-6">
-                <span className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
-                Kenya's verified friendship platform — strictly platonic
-              </span>
-              <h1 className="text-4xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-                Travel Kenya. <br />
-                <span className="text-emerald-300">Never alone.</span>
-              </h1>
-              <p className="mt-5 text-lg text-emerald-100 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                A friend you can trust in every town. Pamoja connects travellers with vetted, verified
-                locals for safe, platonic hangouts across Kenya — sightseeing, dining, coffee and real
-                conversation.{" "}
-                <strong className="text-emerald-300">Strictly platonic. Purely social.</strong>
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-4">
-                <Link href="/search" className="btn-cta px-8 py-4 text-lg shadow-xl">
-                  Find a Companion — free to browse
-                </Link>
-                <Link
-                  href="/become-companion"
-                  className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold px-8 py-4 rounded-2xl transition-colors"
-                >
-                  Become a Companion
-                </Link>
-              </div>
-              <div className="mt-10 flex flex-wrap justify-center lg:justify-start items-center gap-x-8 gap-y-2 text-sm text-emerald-100">
-                <span>Manually approved profiles</span>
-                <span>Mandatory ID verification</span>
-                <span>Strictly 18+</span>
-                <span>Two-way reviews</span>
-                <span>Monitored chats</span>
-              </div>
-            </div>
-
-            <div className="relative hidden sm:block">
-              <div className="absolute -inset-4 rounded-[2rem] bg-emerald-500/30 blur-2xl" />
-              <div className="relative rounded-[2rem] overflow-hidden ring-1 ring-white/20 shadow-2xl">
-                <Scene variant="savanna" uid="hero" className="block w-full h-full" />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-emerald-950/90 to-transparent px-6 pt-14 pb-5">
-                  <p className="font-extrabold text-lg">Two friends, one beautiful country</p>
-                  <p className="text-emerald-100 text-sm">
-                    Nairobi savanna, Mombasa coast, Naivasha highlands — a verified local by your side in
-                    every corner.
-                  </p>
-                </div>
-              </div>
-              <div className="absolute -top-5 -right-5 bg-white text-emerald-900 rounded-2xl shadow-xl px-4 py-3 text-sm font-extrabold">
-                10 cities · 46 hangouts
-              </div>
-              <div className="absolute -bottom-5 -left-5 bg-emerald-600 rounded-2xl shadow-xl px-4 py-3 text-sm font-extrabold">
-                15% goes to Pamoja · 85% stays local
-              </div>
-            </div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-20 lg:py-28 text-center">
+          <span className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-emerald-50 text-sm font-semibold px-4 py-2 rounded-full mb-6">
+            <span className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
+            Kenya's verified friendship platform — strictly platonic
+          </span>
+          <h1 className="text-4xl lg:text-6xl font-extrabold leading-tight tracking-tight">
+            Travel Kenya. <br />
+            <span className="text-emerald-300">Never alone.</span>
+          </h1>
+          <p className="mt-5 text-lg text-emerald-100 max-w-2xl mx-auto leading-relaxed">
+            A friend you can trust in every town. Pamoja connects travellers with vetted, verified
+            locals for safe, platonic hangouts across Kenya — sightseeing, dining, coffee and real
+            conversation.{" "}
+            <strong className="text-emerald-300">Strictly platonic. Purely social.</strong>
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link href="/search" className="btn-cta px-8 py-4 text-lg shadow-xl">
+              Find a Companion — free to browse
+            </Link>
+            <Link
+              href="/become-companion"
+              className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold px-8 py-4 rounded-2xl transition-colors"
+            >
+              Become a Companion
+            </Link>
+          </div>
+          <div className="mt-10 flex flex-wrap justify-center items-center gap-x-8 gap-y-2 text-sm text-emerald-100">
+            <span>Manually approved profiles</span>
+            <span>Mandatory ID verification</span>
+            <span>Strictly 18+</span>
+            <span>Two-way reviews</span>
+            <span>Monitored chats</span>
           </div>
         </div>
       </section>
@@ -218,20 +192,16 @@ export default async function Home() {
             <Link href="/activities" className="text-emerald-700 font-bold hover:underline">Browse all activities →</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {ACTIVITIES.slice(0, 15).map((a, i) => (
+            {ACTIVITIES.slice(0, 15).map((a) => (
               <Link
                 key={a.value}
                 href={`/search?activity=${a.value}`}
-                className="group bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 hover:border-emerald-300 transition-all"
+                className="group bg-white rounded-2xl border border-stone-200 p-4 hover:shadow-lg hover:-translate-y-0.5 hover:border-emerald-300 transition-all"
               >
-                <Scene
-                  variant={sceneForActivity(a.label)}
-                  uid={`act${i}`}
-                  className="block h-16 w-full group-hover:scale-105 transition-transform duration-300"
-                />
-                <span className="flex items-center gap-1.5 px-3 py-2.5 text-sm font-bold text-stone-700 group-hover:text-emerald-700">
-                  {a.label}
+                <span className="block h-8 w-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 font-extrabold flex items-center justify-center text-sm mb-2">
+                  {a.label[0]}
                 </span>
+                <span className="text-sm font-bold text-stone-700 group-hover:text-emerald-700">{a.label}</span>
               </Link>
             ))}
           </div>

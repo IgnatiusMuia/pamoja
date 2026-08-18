@@ -68,17 +68,15 @@ export default function DashboardPage() {
           }}
         />
         <div className="relative">
-          <span className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-emerald-50 text-sm font-semibold px-4 py-1.5 rounded-full mb-5">
-            Welcome, {user.name.split(" ")[0]} — you're part of the Pamoja community
-          </span>
           <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight tracking-tight">
             Travel Kenya.{" "}
             <span className="text-emerald-300">Never alone.</span>
           </h1>
-          <p className="mt-3 text-emerald-100 max-w-2xl mx-auto">
+          <p className="mt-3 text-emerald-100">Welcome, {user.name.split(" ")[0]} — you're part of the Pamoja community.</p>
+          <p className="mt-1 text-emerald-100/80 max-w-2xl mx-auto">
             {user.role === "traveler"
               ? "Find a vetted local companion and start planning your next hangout."
-              : "Companion dashboard — manage your availability, listings and bookings."}
+              : "Manage your availability, listings and bookings."}
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-6">
             {user.role === "traveler" ? (

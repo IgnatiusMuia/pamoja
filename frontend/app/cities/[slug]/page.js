@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CompanionCard from "@/components/CompanionCard";
-import Scene from "@/components/art/Scene";
-import { sceneForCity } from "@/components/art/sceneFor";
 import { api } from "@/lib/api";
 import { ACTIVITIES } from "@/lib/activities";
 import { CITY_INFO, CITIES, citySlug, slugToCity } from "@/lib/cities";
@@ -43,41 +41,27 @@ export default async function CityPage({ params }) {
         <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl" />
         <div className="absolute bottom-0 -left-24 h-64 w-64 rounded-full bg-emerald-900/10 blur-2xl" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 lg:py-20 relative">
-          <div className="grid lg:grid-cols-[1.15fr_1fr] items-center gap-10">
-            <div>
-              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 text-emerald-50 text-sm font-semibold px-4 py-2 rounded-full mb-5">
-                {city} companions
+          <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 text-emerald-50 text-sm font-semibold px-4 py-2 rounded-full mb-5">
+            {city} companions
+          </span>
+          <h1 className="text-3xl lg:text-5xl font-extrabold tracking-tight">
+            {info.tagline} — <span className="text-emerald-300">meet a friendly local</span>
+          </h1>
+          <p className="mt-4 text-lg text-emerald-100 max-w-2xl leading-relaxed">{info.intro}</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {info.highlights.map((h) => (
+              <span key={h} className="bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-semibold">
+                {h}
               </span>
-              <h1 className="text-3xl lg:text-5xl font-extrabold tracking-tight">
-                {info.tagline} — <span className="text-emerald-300">meet a friendly local</span>
-              </h1>
-              <p className="mt-4 text-lg text-emerald-100 max-w-2xl leading-relaxed">{info.intro}</p>
-              <div className="mt-6 flex flex-wrap gap-2">
-                {info.highlights.map((h) => (
-                  <span key={h} className="bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-semibold">
-                    {h}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link href="#companions" className="btn-cta px-7 py-3.5 shadow-xl">
-                  Browse {city} companions
-                </Link>
-                <Link href={`/search?city=${encodeURIComponent(city)}`} className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold px-7 py-3.5 rounded-2xl transition-colors backdrop-blur">
-                  Search with filters →
-                </Link>
-              </div>
-            </div>
-            <div className="relative hidden sm:block">
-              <div className="absolute -inset-3 rounded-[1.75rem] bg-emerald-500/30 blur-2xl" />
-              <div className="relative rounded-[1.75rem] overflow-hidden ring-1 ring-white/20 shadow-2xl">
-                <Scene variant={sceneForCity(city)} uid={`city${citySlug(city)}`} className="block w-full h-72" />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-emerald-950/90 to-transparent px-5 pt-10 pb-4">
-                  <p className="font-extrabold">{city}</p>
-                  <p className="text-emerald-100 text-sm">{info.highlights.slice(0, 2).join(" · ")}</p>
-                </div>
-              </div>
-            </div>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link href="#companions" className="btn-cta px-7 py-3.5 shadow-xl">
+              Browse {city} companions
+            </Link>
+            <Link href={`/search?city=${encodeURIComponent(city)}`} className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold px-7 py-3.5 rounded-2xl transition-colors backdrop-blur">
+              Search with filters →
+            </Link>
           </div>
         </div>
       </section>
