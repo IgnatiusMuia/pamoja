@@ -7,7 +7,16 @@ import Stars from "./Stars";
 import Scene from "./art/Scene";
 import { sceneForCity } from "./art/sceneFor";
 
+const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+function todaySlot(availability) {
+  if (!availability) return null;
+  const key = DAY_KEYS[(new Date().getDay() + 6) % 7];
+  return availability[key] || null;
+}
+
 export default function CompanionCard({ companion }) {
+  const openToday = todaySlot(companion.availability);
   return (
     <Link
       href={`/companions/${companion.id}`}
@@ -49,6 +58,11 @@ export default function CompanionCard({ companion }) {
           <Stars rating={companion.rating_avg} count={companion.rating_count} />
         </div>
         <p className="text-sm text-stone-600 line-clamp-2">{companion.tagline || companion.description}</p>
+        {openToday && (
+          <p className="text-xs font-bold text-emerald-700">
+            Open today · {openToday}
+          </p>
+        )}
         {companion.activity_types?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-1">
             {companion.activity_types.slice(0, 3).map((a) => (

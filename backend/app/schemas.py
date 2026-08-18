@@ -207,6 +207,8 @@ class ConversationOut(BaseModel):
     other_user: BriefUserOut
     last_message: Optional[MessageOut] = None
     unread_count: int = 0
+    blocked_by_me: bool = False
+    blocked_by_them: bool = False
     updated_at: datetime
 
 

@@ -77,11 +77,23 @@ def _conversation_out(conversation: Conversation, me: User, db: Session) -> Conv
         )
         .count()
     )
+    blocks = (
+        db.query(Block)
+        .filter(
+            (Block.blocker_id == me.id) | (Block.blocked_id == me.id)
+        )
+        .filter(
+            (Block.blocker_id == other.id) | (Block.blocked_id == other.id)
+        )
+        .all()
+    )
     return ConversationOut(
         id=conversation.id,
         other_user=other,
         last_message=last,
         unread_count=unread,
+        blocked_by_me=any(b.blocker_id == me.id for b in blocks),
+        blocked_by_them=any(b.blocked_id == me.id for b in blocks),
         updated_at=conversation.updated_at,
     )
 
@@ -95,6 +107,15 @@ def my_conversations(user: User = Depends(get_current_user), db: Session = Depen
         .all()
     )
     return [_conversation_out(c, user, db) for c in conversations]
+
+
+@router.get("/{conversation_id}", response_model=ConversationOut)
+def get_conversation(conversation_id: int, user: User = Depends(get_current_user),
+                     db: Session = Depends(get_db)):
+    conversation = db.get(Conversation, conversation_id)
+    if not conversation or user.id not in (conversation.user_a_id, conversation.user_b_id):
+        raise HTTPException(status_code=403, detail="Not your conversation")
+    return _conversation_out(conversation, user, db)
 
 
 @router.get("/{conversation_id}/messages", response_model=list[MessageOut])

@@ -17,6 +17,8 @@ export default function ChatPage() {
   const [body, setBody] = useState("");
   const [error, setError] = useState(null);
   const [live, setLive] = useState(false);
+  const [conv, setConv] = useState(null);
+  const [busy, setBusy] = useState(false);
   const wsRef = useRef(null);
   const bottomRef = useRef(null);
 
@@ -36,8 +38,14 @@ export default function ChatPage() {
     if (!requireAuth()) return;
 
     let polling = null;
-    api("/auth/me", { token: getToken() })
-      .then(setMe)
+    Promise.all([
+      api("/auth/me", { token: getToken() }),
+      api(`/conversations/${id}`, { token: getToken() }),
+    ])
+      .then(([u, c]) => {
+        setMe(u);
+        setConv(c);
+      })
       .then(load)
       .catch((e) => setError(e.message));
 
@@ -106,6 +114,22 @@ export default function ChatPage() {
     }
   }
 
+  async function toggleBlock() {
+    setBusy(true);
+    try {
+      if (conv.blocked_by_me) {
+        await api(`/blocks/${conv.other_user.id}`, { method: "DELETE", token: getToken() });
+      } else {
+        await api("/blocks", { method: "POST", token: getToken(), body: { blocked_id: conv.other_user.id } });
+      }
+      setConv({ ...conv, blocked_by_me: !conv.blocked_by_me });
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!me)
     return (
       <div className="text-center py-24 text-stone-400">
@@ -133,7 +157,37 @@ export default function ChatPage() {
           }`}>
             {live ? "● Live" : "Polling…"}
           </span>
+          {conv && (
+            <button
+              onClick={toggleBlock}
+              disabled={busy}
+              className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
+                conv.blocked_by_me
+                  ? "bg-white border-stone-300 text-stone-600 hover:bg-stone-50"
+                  : "bg-white border-red-300 text-red-600 hover:bg-red-50"
+              }`}
+            >
+              {conv.blocked_by_me ? "Unblock" : "Block"}
+            </button>
+          )}
         </div>
+
+        {conv?.blocked_by_me && (
+          <div className="px-5 pt-4">
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3 text-sm">
+              You've blocked {conv.other_user.name}. They can't message you — use the
+              "Unblock" button above to resume chatting.
+            </div>
+          </div>
+        )}
+        {conv?.blocked_by_them && (
+          <div className="px-5 pt-4">
+            <div className="bg-stone-100 border border-stone-200 text-stone-600 rounded-xl px-4 py-3 text-sm">
+              {conv.other_user.name} has blocked you — messaging is paused. If you feel this is a
+              mistake or a safety issue, contact support from your profile.
+            </div>
+          </div>
+        )}
 
         <div className="grow overflow-y-auto p-5 space-y-3 bg-stone-50/50">
           {messages.map((m) => {
@@ -163,8 +217,9 @@ export default function ChatPage() {
           <input
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Write a message…"
-            className="grow rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            placeholder={conv?.blocked_by_me || conv?.blocked_by_them ? "Messaging is paused" : "Write a message…"}
+            disabled={conv?.blocked_by_me || conv?.blocked_by_them}
+            className="grow rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-stone-50 disabled:text-stone-400"
           />
           <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors">
             Send
