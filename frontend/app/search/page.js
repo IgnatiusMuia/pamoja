@@ -24,7 +24,7 @@ function buildQuery(params) {
   return q.toString();
 }
 
-export default function SearchPage() {
+function SearchPage() {
   return (
     <Suspense>
       <SearchContent />
@@ -252,5 +252,13 @@ function SearchContent() {
         </>
       )}
     </div>
+  );
+}
+
+export default function SearchPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <SearchPage />
+    </Suspense>
   );
 }

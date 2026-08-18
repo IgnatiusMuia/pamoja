@@ -282,7 +282,7 @@ export default function AdminPage() {
               <div key={b.id} className="bg-white border border-stone-200 rounded-2xl p-4 shadow-sm flex flex-wrap items-center gap-4">
                 <div className="min-w-0 grow">
                   <p className="font-bold">
-                    <Link href={`/dashboard/bookings/${b.id}`} className="hover:underline">
+                    <Link href={`/dashboard/bookings/view?id=${b.id}`} className="hover:underline">
                       #{b.id} {b.activity}
                     </Link>
                     <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded-full capitalize ${

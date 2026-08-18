@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Avatar from "@/components/Avatar";
 import FavHeart from "@/components/FavHeart";
 import Stars from "@/components/Stars";
@@ -13,8 +14,8 @@ import { activityLabel } from "@/lib/activities";
 
 const DAY_LABELS = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
 
-export default function CompanionProfilePage() {
-  const { id } = useParams();
+function CompanionProfilePage() {
+  const id = useSearchParams().get("id");
   const [companion, setCompanion] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState(null);
@@ -82,7 +83,7 @@ export default function CompanionProfilePage() {
 
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Link
-              href={isLoggedIn() ? `/book/${c.id}` : `/login?next=/book/${c.id}`}
+              href={isLoggedIn() ? `/book?id=${c.id}` : `/login?next=${encodeURIComponent(`/book?id=${c.id}`)}`}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow transition-colors"
             >
                Book {c.name.split(" ")[0]}
@@ -260,5 +261,13 @@ export default function CompanionProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CompanionProfilePageWrapper() {
+  return (
+    <Suspense fallback={<div className="text-center py-24 text-stone-400">Loading profile…</div>}>
+      <CompanionProfilePage />
+    </Suspense>
   );
 }

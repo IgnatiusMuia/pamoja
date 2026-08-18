@@ -17,7 +17,7 @@ export default function CompanionCard({ companion }) {
   const openToday = todaySlot(companion.availability);
   return (
     <Link
-      href={`/companions/${companion.id}`}
+      href={`/companions/view?id=${companion.id}`}
       className="group bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 border border-stone-200/80 overflow-hidden flex flex-col hover:border-emerald-300"
     >
       <div className="relative h-40 bg-emerald-600 flex items-center justify-center p-4">

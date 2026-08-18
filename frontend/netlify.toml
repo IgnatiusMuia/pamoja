@@ -1,12 +1,9 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+  publish = "out"
 
 [build.environment]
   NODE_VERSION = "22"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# Rewrites for SPA-style public paths are handled by the Next.js runtime plugin;
-# API calls go straight to NEXT_PUBLIC_API_URL (backend on Render/Railway).
+# Pure static export (next.config: output = "export"), no server runtime.
+# API calls go straight to NEXT_PUBLIC_API_URL (backend on Render).

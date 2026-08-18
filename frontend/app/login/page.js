@@ -97,7 +97,7 @@ function LoginForm() {
   );
 }
 
-export default function LoginPage() {
+function LoginPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-16">
       <div className="bg-white border border-stone-200 rounded-3xl shadow-sm p-8">
@@ -114,5 +114,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPage />
+    </Suspense>
   );
 }

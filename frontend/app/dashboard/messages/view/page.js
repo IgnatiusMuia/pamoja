@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import DashTabs from "@/components/DashTabs";
 import Avatar from "@/components/Avatar";
 import { API_BASE_URL, api } from "@/lib/api";
@@ -10,8 +11,8 @@ import { getToken, requireAuth } from "@/lib/auth";
 
 const WS_BASE = API_BASE_URL.replace(/^http/, "ws");
 
-export default function ChatPage() {
-  const { id } = useParams();
+function ChatPage() {
+  const id = useSearchParams().get("id");
   const [me, setMe] = useState(null);
   const [messages, setMessages] = useState([]);
   const [body, setBody] = useState("");
@@ -227,5 +228,13 @@ export default function ChatPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ChatPageWrapper() {
+  return (
+    <Suspense fallback={<div className="text-center py-24 text-stone-400">Loading messages…</div>}>
+      <ChatPage />
+    </Suspense>
   );
 }

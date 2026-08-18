@@ -70,7 +70,7 @@ export default function SavedPage() {
                 </div>
                 <p className="text-sm text-stone-600 line-clamp-2">{c.tagline || c.description}</p>
                 <div className="mt-auto pt-3 flex items-center justify-between gap-2">
-                  <Link href={`/companions/${c.id}`} className="text-sm font-bold text-emerald-700 hover:underline">
+                  <Link href={`/companions/view?id=${c.id}`} className="text-sm font-bold text-emerald-700 hover:underline">
                     View profile →
                   </Link>
                   <div className="flex items-center gap-2">

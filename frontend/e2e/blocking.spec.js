@@ -22,7 +22,7 @@ test("block and unblock a member from the chat", async ({ page }) => {
   expect(convRes.ok()).toBeTruthy();
   const conv = await convRes.json();
 
-  await page.goto(`/dashboard/messages/${conv.id}`);
+  await page.goto(`/dashboard/messages/view?id=${conv.id}`);
   await expect(page.getByRole("button", { name: "Block" })).toBeVisible();
 
   await page.getByRole("button", { name: "Block" }).click();

@@ -1,5 +1,7 @@
 import { CITIES, citySlug } from "@/lib/cities";
 
+export const dynamic = "force-static";
+
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://pamoja.ke";
 
 export default function sitemap() {

@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { ACTIVITIES } from "@/lib/activities";
 import { CITY_INFO, CITIES, citySlug, slugToCity } from "@/lib/cities";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return CITIES.map((c) => ({ slug: citySlug(c) }));

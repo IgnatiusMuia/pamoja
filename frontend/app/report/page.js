@@ -96,10 +96,18 @@ function ReportForm() {
   );
 }
 
-export default function ReportPage() {
+function ReportPage() {
   return (
     <Suspense>
       <ReportForm />
+    </Suspense>
+  );
+}
+
+export default function ReportPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <ReportPage />
     </Suspense>
   );
 }

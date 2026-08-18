@@ -160,7 +160,7 @@ function RegisterForm() {
   );
 }
 
-export default function RegisterPage() {
+function RegisterPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-16">
       <div className="bg-white border border-stone-200 rounded-3xl shadow-sm p-8">
@@ -177,5 +177,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPage />
+    </Suspense>
   );
 }

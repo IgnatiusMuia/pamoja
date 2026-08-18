@@ -23,7 +23,7 @@ export default function BookingCard({ booking, me }) {
 
   return (
     <Link
-      href={`/dashboard/bookings/${booking.id}`}
+      href={`/dashboard/bookings/view?id=${booking.id}`}
       className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all block"
     >
       <div className="flex items-center justify-between gap-3">

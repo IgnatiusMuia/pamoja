@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 import Avatar from "@/components/Avatar";
 import { api } from "@/lib/api";
 import { getToken, requireAuth } from "@/lib/auth";
@@ -10,8 +11,8 @@ import { ACTIVITIES } from "@/lib/activities";
 
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
-export default function BookPage() {
-  const { id } = useParams();
+function BookPage() {
+  const id = useSearchParams().get("id");
   const router = useRouter();
   const [me, setMe] = useState(null);
   const [companion, setCompanion] = useState(null);
@@ -78,7 +79,7 @@ export default function BookPage() {
           notes: form.notes || null,
         },
       });
-      router.push(`/dashboard/bookings/${booking.id}?created=1`);
+      router.push(`/dashboard/bookings/view?id=${booking.id}&created=1`);
     } catch (e) {
       setError(e.message);
       setBusy(false);
@@ -194,5 +195,13 @@ export default function BookPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function BookPageWrapper() {
+  return (
+    <Suspense fallback={<div className="text-center py-24 text-stone-400">Loading…</div>}>
+      <BookPage />
+    </Suspense>
   );
 }

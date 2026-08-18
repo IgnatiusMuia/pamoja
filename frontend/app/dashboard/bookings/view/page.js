@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 import DashTabs from "@/components/DashTabs";
 import Avatar from "@/components/Avatar";
 import { StatusBadge, STATUS_STYLES } from "@/components/BookingCard";
 import { api } from "@/lib/api";
 import { getToken, requireAuth, ksh } from "@/lib/auth";
 
-export default function BookingDetailPage() {
-  const { id } = useParams();
+function BookingDetailPage() {
+  const id = useSearchParams().get("id");
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [booking, setBooking] = useState(null);
@@ -277,5 +278,13 @@ export default function BookingDetailPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BookingDetailPageWrapper() {
+  return (
+    <Suspense fallback={<div className="text-center py-24 text-stone-400">Loading booking…</div>}>
+      <BookingDetailPage />
+    </Suspense>
   );
 }

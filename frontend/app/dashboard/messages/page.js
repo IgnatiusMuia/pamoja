@@ -36,7 +36,7 @@ function MessageList() {
   useEffect(() => {
     if (!me || !startWith) return;
     if (conversations.find((c) => c.other_user.id === startWith)) {
-      router.push(`/dashboard/messages/${conversations.find((c) => c.other_user.id === startWith).id}`);
+      router.push(`/dashboard/messages/view?id=${conversations.find((c) => c.other_user.id === startWith).id}`);
       return;
     }
     api("/conversations", {
@@ -44,7 +44,7 @@ function MessageList() {
       token: getToken(),
       body: { user_b_id: startWith, booking_id: bookingId || null },
     })
-      .then((c) => router.push(`/dashboard/messages/${c.id}`))
+      .then((c) => router.push(`/dashboard/messages/view?id=${c.id}`))
       .catch((e) => alert(e.message));
   }, [me, startWith]);
 
@@ -71,7 +71,7 @@ function MessageList() {
       ) : (
         <div className="space-y-3">
           {conversations.map((c) => (
-            <Link key={c.id} href={`/dashboard/messages/${c.id}`}
+            <Link key={c.id} href={`/dashboard/messages/view?id=${c.id}`}
               className="flex items-center gap-3 bg-white border border-stone-200 rounded-2xl p-4 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all">
               <Avatar user={c.other_user} />
               <div className="min-w-0 grow">
@@ -96,10 +96,18 @@ function MessageList() {
   );
 }
 
-export default function MessagesPage() {
+function MessagesPage() {
   return (
     <Suspense>
       <MessageList />
+    </Suspense>
+  );
+}
+
+export default function MessagesPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <MessagesPage />
     </Suspense>
   );
 }

@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { ACTIVITIES } from "@/lib/activities";
 import { CITIES, CITY_INFO, citySlug } from "@/lib/cities";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 const STEPS = [
   {

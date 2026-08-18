@@ -11,3 +11,5 @@ __pycache__/
 *.db
 .env
 *.log
+# Local Netlify folder
+.netlify
