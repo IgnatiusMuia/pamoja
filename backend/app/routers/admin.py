@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -169,10 +169,39 @@ def reject_companion(user_id: int, db: Session = Depends(get_db),
 @router.post("/users/{user_id}/suspend")
 def suspend_user(user_id: int, db: Session = Depends(get_db),
                  _: User = Depends(require_admin)):
+    from datetime import date, datetime, timedelta
+
+    from ..models import Booking, Notification
+
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.status = "suspended"
+
+    # Automatically cancel the suspended member's open bookings and tell the
+    # other side why.
+    tomorrow = date.today() + timedelta(days=1)
+    open_bookings = db.query(Booking).filter(
+        Booking.status.in_(["pending", "accepted"]),
+        or_(Booking.traveler_id == user_id, Booking.companion_id == user_id),
+    ).all()
+    for b in open_bookings:
+        b.status = "cancelled"
+        other_id = b.companion_id if b.traveler_id == user_id else b.traveler_id
+        if other_id != user_id:
+            db.add(
+                Notification(
+                    user_id=other_id,
+                    type="booking",
+                    title="A booking was cancelled",
+                    body=(
+                        f"Your booking #{b.id} ({b.activity}) was cancelled because "
+                        f"{user.name}'s account was suspended by our team. "
+                        "You have not been charged."
+                    ),
+                    link=f"/dashboard/bookings/{b.id}",
+                )
+            )
     db.commit()
     return {"ok": True, "suspended": True}
 

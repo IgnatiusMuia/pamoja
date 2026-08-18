@@ -256,6 +256,11 @@ export default function AdminPage() {
               </p>
               <p className="text-sm text-stone-600 mt-1 bg-stone-50 rounded-lg px-3 py-2">"{m.body}"</p>
               <p className="text-xs text-stone-400 mt-2">Original content removed automatically — an open report was filed on behalf of the sender.</p>
+              <div className="mt-3">
+                <button onClick={() => act(`/admin/users/${m.sender_id}/suspend`)} className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-red-700">
+                  Suspend {m.sender_name}
+                </button>
+              </div>
             </div>
           ))}
         </div>

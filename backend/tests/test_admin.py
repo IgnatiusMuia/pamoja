@@ -155,6 +155,51 @@ def test_booking_reminders_for_tomorrow(client):
     db.close()
 
 
+def test_suspend_cancels_open_bookings_and_notifies(client):
+    from .conftest import login
+
+    headers = admin_headers(client)
+    _, t_headers = new_traveler(client)
+    c_headers = login(client, "wanjiru.kamau@pamoja.ke")  # companion 3
+
+    d = date.today() + timedelta(days=30)
+    while d.weekday() >= 5:
+        d += timedelta(days=1)
+    b = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": 3,
+            "activity": "Coffee House Hangouts",
+            "booking_date": d.isoformat(),
+            "start_time": "10:00",
+            "hours": 2,
+        },
+    ).json()
+    client.post(f"/bookings/{b['id']}/accept", headers=c_headers)
+
+    companion_id = client.get("/auth/me", headers=c_headers).json()["id"]
+    res = client.post(f"/admin/users/{companion_id}/suspend", headers=headers)
+    assert res.json()["suspended"] is True
+
+    # the accepted booking is auto-cancelled and the traveler is told why
+    booking = client.get(f"/bookings/{b['id']}", headers=t_headers).json()
+    assert booking["status"] == "cancelled"
+    notifs = client.get("/notifications", headers=t_headers).json()
+    assert any("suspended" in n["body"] for n in notifs)
+
+    # the suspended companion can no longer use or extend their account
+    assert client.get("/auth/me", headers=c_headers).status_code == 403
+    assert client.post("/bookings", headers=c_headers, json={
+        "companion_id": 3, "activity": "Hiking",
+        "booking_date": d.isoformat(), "start_time": "10:00", "hours": 1,
+    }).status_code in (400, 403)
+
+    # unsuspend restores access
+    assert client.post(f"/admin/users/{companion_id}/unsuspend", headers=headers).json()["unsuspended"] is True
+    assert client.get("/auth/me", headers=c_headers).json()["status"] == "active"
+
+
 def test_admin_bookings_list(client):
     headers = admin_headers(client)
     _, t_headers = new_traveler(client)
