@@ -5,12 +5,52 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import (Booking, CompanionProfile, Conversation, Message, Report,
-                      Review, User)
+from ..models import (Booking, CompanionProfile, Conversation, Message, Payment,
+                      Report, Review, User)
 from ..schemas import AdminStatsOut
 from ..security import require_admin
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+@router.get("/payments")
+def list_payments(status: str = "all", method: str = "all", db: Session = Depends(get_db),
+                  _: User = Depends(require_admin)):
+    q = db.query(Payment)
+    if status != "all":
+        q = q.filter(Payment.status == status)
+    if method != "all":
+        q = q.filter(Payment.method == method)
+    rows = q.order_by(Payment.created_at.desc()).limit(200).all()
+    names = {u.id: u.name for u in db.query(User).filter(User.id.in_({p.user_id for p in rows})).all()}
+    return [
+        {
+            "id": p.id,
+            "user_id": p.user_id,
+            "user_name": names.get(p.user_id, "—"),
+            "amount_kes": p.amount_kes,
+            "method": p.method,
+            "status": p.status,
+            "reference": p.reference,
+            "created_at": p.created_at.isoformat(),
+        }
+        for p in rows
+    ]
+
+
+@router.post("/payments/{payment_id}/settle")
+def settle_payment(payment_id: int, db: Session = Depends(get_db),
+                   _: User = Depends(require_admin)):
+    p = db.get(Payment, payment_id)
+    if not p:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    if p.method != "commission":
+        raise HTTPException(status_code=400, detail="Only commissions can be settled here")
+    if p.status != "due":
+        raise HTTPException(status_code=400, detail=f"Payment is already '{p.status}'")
+    p.status = "paid"
+    db.commit()
+    return {"ok": True, "id": p.id, "status": p.status}
 
 
 @router.get("/stats", response_model=AdminStatsOut)
@@ -26,6 +66,31 @@ def stats(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     )
 
 
+@router.get("/bookings")
+def list_all_bookings(status: str = "all", db: Session = Depends(get_db),
+                      _: User = Depends(require_admin)):
+    q = db.query(Booking)
+    if status != "all":
+        q = q.filter(Booking.status == status)
+    rows = q.order_by(Booking.created_at.desc()).limit(200).all()
+    return [
+        {
+            "id": b.id,
+            "activity": b.activity,
+            "booking_date": b.booking_date.isoformat(),
+            "start_time": b.start_time,
+            "hours": b.hours,
+            "total_kes": b.total_kes,
+            "commission_kes": b.commission_kes,
+            "status": b.status,
+            "created_at": b.created_at.isoformat(),
+            "traveler": {"id": b.traveler_id, "name": b.traveler.name},
+            "companion": {"id": b.companion_id, "name": b.companion.name},
+        }
+        for b in rows
+    ]
+
+
 @router.get("/companions")
 def list_companions(status: str = "all", db: Session = Depends(get_db),
                     _: User = Depends(require_admin)):
@@ -39,18 +104,36 @@ def list_companions(status: str = "all", db: Session = Depends(get_db),
     elif status == "rejected":
         q = q.filter(User.status == "rejected")
     users = q.order_by(User.created_at.desc()).all()
-    return [
-        {
-            "id": u.id, "name": u.name, "email": u.email, "city": u.city,
-            "is_approved": u.is_approved, "status": u.status,
-            "created_at": u.created_at.isoformat(),
-            "rate": (
-                db.query(CompanionProfile.hourly_rate_kes)
-                .filter(CompanionProfile.user_id == u.id).scalar()
-            ),
-        }
-        for u in users
-    ]
+    rows = []
+    for u in users:
+        cp = db.query(CompanionProfile).filter(CompanionProfile.user_id == u.id).first()
+        rows.append(
+            {
+                "id": u.id, "name": u.name, "email": u.email, "city": u.city,
+                "is_approved": u.is_approved, "status": u.status,
+                "created_at": u.created_at.isoformat(),
+                "rate": cp.hourly_rate_kes if cp else None,
+                "verified_id": bool(cp and cp.verified_id),
+                "id_document_url": cp.id_document_url if cp else None,
+                "id_verified_at": cp.id_verified_at.isoformat() if cp and cp.id_verified_at else None,
+            }
+        )
+    return rows
+
+
+@router.post("/companions/{user_id}/verify-id")
+def verify_companion_id(user_id: int, db: Session = Depends(get_db),
+                        _: User = Depends(require_admin)):
+    user = db.get(User, user_id)
+    cp = user.companion_profile if user else None
+    if not user or user.role != "companion" or not cp:
+        raise HTTPException(status_code=404, detail="Companion not found")
+    if not cp.id_document_url:
+        raise HTTPException(status_code=400, detail="Companion has not submitted an ID document yet")
+    cp.verified_id = True
+    cp.id_verified_at = datetime.utcnow()
+    db.commit()
+    return {"ok": True, "verified": True}
 
 
 @router.post("/companions/{user_id}/approve")
@@ -59,6 +142,12 @@ def approve_companion(user_id: int, db: Session = Depends(get_db),
     user = db.get(User, user_id)
     if not user or user.role != "companion":
         raise HTTPException(status_code=404, detail="Companion not found")
+    cp = user.companion_profile
+    if not cp or not cp.verified_id:
+        raise HTTPException(
+            status_code=400,
+            detail="ID verification is mandatory before approval — verify the companion's ID document first",
+        )
     user.is_approved = True
     user.status = "active"
     db.commit()
@@ -177,11 +266,24 @@ def analytics(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     }
 
     paid = db.query(Booking).filter(Booking.status == "completed").all()
+    listing_fees = (
+        db.query(func.sum(Payment.amount_kes), func.count(Payment.id))
+        .filter(Payment.status == "paid")
+        .first()
+    )
+    due_commissions = (
+        db.query(func.sum(Payment.amount_kes))
+        .filter(Payment.method == "commission", Payment.status == "due")
+        .scalar()
+    )
     revenue = {
         "bookings": len(paid),
         "total_kes": sum(b.total_kes for b in paid),
         "commission_kes": sum(b.commission_kes for b in paid),
         "payouts_kes": sum(b.payout_kes for b in paid),
+        "listing_fees_kes": int(listing_fees[0] or 0),
+        "listing_payments": int(listing_fees[1] or 0),
+        "commission_due_kes": int(due_commissions or 0),
     }
 
     top_rows = (
@@ -212,6 +314,19 @@ def analytics(db: Session = Depends(get_db), _: User = Depends(require_admin)):
         for i in range(14)
     ]
 
+    booking_dates = (
+        db.query(func.date(Booking.created_at), func.count(Booking.id))
+        .filter(func.date(Booking.created_at) >= since)
+        .group_by(func.date(Booking.created_at))
+        .all()
+    )
+    bday = {str(d): c for d, c in booking_dates}
+    bookings_by_day = [
+        {"date": (since + timedelta(days=i)).isoformat(),
+         "count": bday.get((since + timedelta(days=i)).isoformat(), 0)}
+        for i in range(14)
+    ]
+
     city_rows = (
         db.query(User.city, func.count(User.id))
         .filter(User.role == "companion", User.city.isnot(None))
@@ -227,6 +342,7 @@ def analytics(db: Session = Depends(get_db), _: User = Depends(require_admin)):
         "revenue": revenue,
         "top_companions": top_companions,
         "signups_by_day": signups_by_day,
+        "bookings_by_day": bookings_by_day,
         "companions_by_city": companions_by_city,
         "avg_rating": round(float(rating or 0), 2),
     }

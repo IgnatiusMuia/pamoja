@@ -8,7 +8,8 @@ import FavHeart from "@/components/FavHeart";
 import Stars from "@/components/Stars";
 import { api } from "@/lib/api";
 import { getToken, isLoggedIn } from "@/lib/auth";
-import { activityLabel, activityEmoji } from "@/lib/activities";
+import { genderLabel } from "@/lib/gender";
+import { activityLabel } from "@/lib/activities";
 
 const DAY_LABELS = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
 
@@ -37,7 +38,7 @@ export default function CompanionProfilePage() {
   if (error)
     return (
       <div className="max-w-3xl mx-auto px-4 py-24 text-center">
-        <div className="text-5xl mb-4">🤷</div>
+        <div className="text-5xl mb-4"></div>
         <p className="text-stone-600">{error}</p>
         <Link href="/search" className="mt-4 inline-block text-emerald-700 font-bold hover:underline">Back to search</Link>
       </div>
@@ -49,7 +50,7 @@ export default function CompanionProfilePage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       {/* header card */}
       <div className="bg-white border border-stone-200 rounded-3xl shadow-sm overflow-hidden">
-        <div className="h-40 bg-gradient-to-br from-emerald-200 via-teal-100 to-sky-200 flex items-center justify-center relative">
+        <div className="h-40 bg-emerald-600 flex items-center justify-center relative">
           <FavHeart companionId={c.id} className="absolute top-4 right-4 h-10 w-10" />
           <Avatar user={c} size="lg" className="h-32 w-32 text-4xl ring-4 ring-white" />
         </div>
@@ -63,7 +64,7 @@ export default function CompanionProfilePage() {
                     <span className="bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-full">✓ ID verified</span>
                   )}
                 </h1>
-                <p className="text-stone-500 mt-1">📍 {c.city} · {c.gender}</p>
+                <p className="text-stone-500 mt-1"> {c.city} · {genderLabel(c.gender) || c.gender}</p>
               </div>
             </div>
             <div className="text-right">
@@ -84,13 +85,13 @@ export default function CompanionProfilePage() {
               href={isLoggedIn() ? `/book/${c.id}` : `/login?next=/book/${c.id}`}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow transition-colors"
             >
-              📅 Book {c.name.split(" ")[0]}
+               Book {c.name.split(" ")[0]}
             </Link>
             <Link
               href={isLoggedIn() ? `/dashboard/messages?user=${c.id}` : `/login?next=/dashboard/messages?user=${c.id}`}
               className="bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold px-6 py-3 rounded-xl transition-colors"
             >
-              💬 Send a message
+               Send a message
             </Link>
             <Link
               href={`/report?id=${c.id}`}
@@ -129,8 +130,8 @@ export default function CompanionProfilePage() {
             <div className="flex flex-wrap gap-2">
               {c.activity_types?.length > 0 ? (
                 c.activity_types.map((a) => (
-                  <span key={a} className="bg-orange-50 text-orange-700 border border-orange-200 text-sm font-semibold px-3 py-1.5 rounded-full">
-                    {activityEmoji(a)} {activityLabel(a)}
+                  <span key={a} className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-semibold px-3 py-1.5 rounded-full">
+                    {activityLabel(a)}
                   </span>
                 ))
               ) : (
@@ -151,8 +152,8 @@ export default function CompanionProfilePage() {
             <h2 className="font-bold text-lg mt-6 mb-3">Languages</h2>
             <div className="flex flex-wrap gap-2">
               {c.languages?.map((l) => (
-                <span key={l} className="bg-sky-50 text-sky-700 border border-sky-200 text-sm font-semibold px-3 py-1.5 rounded-full">
-                  🌐 {l}
+                <span key={l} className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-semibold px-3 py-1.5 rounded-full">
+                   {l}
                 </span>
               ))}
             </div>
@@ -167,7 +168,7 @@ export default function CompanionProfilePage() {
               <p className="text-stone-400 text-sm">No reviews yet — be the first to book and review!</p>
             ) : (
               <>
-                <div className="flex items-start gap-6 mb-5 bg-gradient-to-r from-emerald-50 to-amber-50 rounded-xl p-4">
+                <div className="flex items-start gap-6 mb-5 bg-stone-50 border border-stone-200 rounded-xl p-4">
                   <div className="text-center shrink-0">
                     <div className="text-4xl font-extrabold text-emerald-700">{c.rating_avg || "—"}</div>
                     <Stars rating={c.rating_avg} />
@@ -182,7 +183,7 @@ export default function CompanionProfilePage() {
                           <span className="w-4 text-stone-500 font-semibold shrink-0">{star}</span>
                           <div className="flex-1 h-2.5 bg-stone-200 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-emerald-500 to-amber-400 rounded-full"
+                              className="h-full bg-emerald-500 rounded-full"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -234,9 +235,9 @@ export default function CompanionProfilePage() {
             <p className="mt-3 text-xs text-stone-400">Times are flexible — message to arrange.</p>
           </div>
 
-          <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
-            <h2 className="font-bold text-lg text-orange-800 mb-2">How booking works</h2>
-            <ol className="text-sm text-orange-900/80 space-y-2 list-decimal list-inside">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
+            <h2 className="font-bold text-lg text-emerald-800 mb-2">How booking works</h2>
+            <ol className="text-sm text-emerald-900/80 space-y-2 list-decimal list-inside">
               <li>Send a booking request with your date & activity</li>
               <li>Chat to agree details and confirm the rate</li>
               <li>{c.name.split(" ")[0]} accepts and you meet in a public place</li>
@@ -245,7 +246,7 @@ export default function CompanionProfilePage() {
           </div>
 
           <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm text-sm">
-            <h2 className="font-bold mb-2">📸 Photos</h2>
+            <h2 className="font-bold mb-2"> Photos</h2>
             {c.photos?.length > 0 ? (
               <div className="grid grid-cols-2 gap-2">
                 {c.photos.map((p) => (

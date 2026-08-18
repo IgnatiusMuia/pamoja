@@ -8,8 +8,6 @@ import { api } from "@/lib/api";
 import { getToken, requireAuth } from "@/lib/auth";
 import { ACTIVITIES } from "@/lib/activities";
 
-const ACTIVITY_EMOJI_MAP = Object.fromEntries(ACTIVITIES.map((a) => [a.label, a.emoji]));
-
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
 export default function BookPage() {
@@ -100,7 +98,7 @@ export default function BookPage() {
       <Link href={`/companions/${id}`} className="text-sm text-emerald-700 font-bold hover:underline">← Companion profile</Link>
 
       <div className="mt-4 bg-white border border-stone-200 rounded-3xl shadow-sm overflow-hidden">
-        <div className="bg-gradient-to-br from-emerald-600 to-sky-700 text-white px-6 lg:px-8 py-6 flex items-center gap-4">
+        <div className="bg-emerald-600 text-white px-6 lg:px-8 py-6 flex items-center gap-4">
           <Avatar user={companion} size="lg" />
           <div>
             <h1 className="text-xl font-extrabold">Request {companion?.name}</h1>
@@ -125,7 +123,7 @@ export default function BookPage() {
             >
               <option value="">Choose an activity…</option>
               {ACTIVITIES.map((a) => (
-                <option key={a.value} value={a.label}>{a.emoji} {a.label}</option>
+                <option key={a.value} value={a.label}>{a.label}</option>
               ))}
             </select>
           </label>
@@ -138,7 +136,7 @@ export default function BookPage() {
                 onChange={(e) => setForm({ ...form, booking_date: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
               {companionUnavailable && (
-                <span className="mt-1 block text-[11px] font-semibold text-amber-600">
+                <span className="mt-1 block text-[11px] font-semibold text-emerald-600">
                   {companion?.name?.split(" ")[0]} doesn't work on this day — pick another date.
                 </span>
               )}
@@ -182,7 +180,7 @@ export default function BookPage() {
               </div>
             </div>
             <p className="text-xs text-stone-400 mt-2 italic">
-              💳 Secure payment coming soon — this request confirms your agreement and rate.
+               Secure payment coming soon — this request confirms your agreement and rate.
             </p>
           </div>
 

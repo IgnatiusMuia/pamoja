@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy.orm import Session
 
 from .database import SessionLocal
@@ -6,7 +8,7 @@ from .security import hash_password
 
 COMPANIONS = [
     {
-        "name": "Wanjiru Kamau", "gender": "female", "city": "Nairobi",
+        "name": "Wanjiru Kamau", "gender": "straight_female", "city": "Nairobi",
         "tagline": "Nairobi insider who knows every hidden gem",
         "rate": 1500,
         "bio": "Born and raised in Nairobi. I love showing visitors the real city — from Kibera art tours to rooftop dinners with a view of the skyline. Fluent storyteller, huge coffee nerd.",
@@ -17,7 +19,7 @@ COMPANIONS = [
                          "thu": "09:00-17:00", "fri": "09:00-19:00", "sat": "10:00-20:00"},
     },
     {
-        "name": "Brian Otieno", "gender": "male", "city": "Nairobi",
+        "name": "Brian Otieno", "gender": "straight_male", "city": "Nairobi",
         "tagline": "Safari planner, hiking buddy, event plus-one",
         "rate": 1200,
         "bio": "Ex-tour guide with 6 years of experience. I plan walks in Karura Forest, day trips to Amboseli, and can help you navigate matatus like a local. All about good vibes and safe adventures.",
@@ -29,7 +31,7 @@ COMPANIONS = [
         "featured": True,
     },
     {
-        "name": "Fatuma Hassan", "gender": "female", "city": "Mombasa",
+        "name": "Fatuma Hassan", "gender": "straight_female", "city": "Mombasa",
         "tagline": "Swahili culture, old town stories, seafood nights",
         "rate": 1300,
         "bio": "Mombasa girl through and through. I'll walk you through Old Town's winding alleys, show you the best seafood spots locals love, and tell you the history behind the tusks and Fort Jesus.",
@@ -40,7 +42,7 @@ COMPANIONS = [
                          "sat": "09:00-20:00", "sun": "10:00-18:00"},
     },
     {
-        "name": "Samwel Kipchoge", "gender": "male", "city": "Eldoret",
+        "name": "Samwel Kipchoge", "gender": "straight_male", "city": "Eldoret",
         "tagline": "Rift Valley runner, stadium tours, local legends",
         "rate": 1000,
         "bio": "Eldoret is home of champions and I'm your guide to it. Morning jog at Iten, meet local athletes, visit the cheese farms, and eat like a champion. Friendly, punctual, very fit!",
@@ -51,7 +53,7 @@ COMPANIONS = [
                          "sat": "08:00-18:00", "sun": "10:00-16:00"},
     },
     {
-        "name": "Zawadi Mwangi", "gender": "female", "city": "Nakuru",
+        "name": "Zawadi Mwangi", "gender": "lesbian", "city": "Nakuru",
         "tagline": "Flamingos, waterfalls, and Nakuru's best Nyama Choma",
         "rate": 1100,
         "bio": "I grew up minutes from Lake Nakuru National Park. Let me arrange your flamingo viewing, a walk by Menengai Crater, and a proper nyama choma evening with local friends. Karibu!",
@@ -62,7 +64,7 @@ COMPANIONS = [
                          "fri": "09:00-18:00", "sat": "09:00-20:00", "sun": "10:00-18:00"},
     },
     {
-        "name": "Amina Yusuf", "gender": "female", "city": "Diani",
+        "name": "Amina Yusuf", "gender": "straight_female", "city": "Diani",
         "tagline": "White sands, snorkelling, and sunset dhow rides",
         "rate": 1800,
         "bio": "Diani is paradise and I live in it. Snorkel the marine park, walk the beach at low tide, or just sip coconuts while we talk life. I know every tide table and every great sunset spot.",
@@ -74,7 +76,7 @@ COMPANIONS = [
         "featured": True,
     },
     {
-        "name": "Grace Njeri", "gender": "female", "city": "Nyeri",
+        "name": "Grace Njeri", "gender": "straight_female", "city": "Nyeri",
         "tagline": "Mount Kenya foothills, coffee farms, and green tea",
         "rate": 900,
         "bio": "Up-country girl with a love for quiet beauty. We'll visit coffee estates, hike the foothills of Mount Kenya, and sip tea at a farm overlooking the Aberdares. Peaceful and warm company.",
@@ -85,7 +87,7 @@ COMPANIONS = [
                          "thu": "09:00-16:00", "fri": "09:00-17:00", "sat": "09:00-18:00"},
     },
     {
-        "name": "Achieng Odhiambo", "gender": "female", "city": "Kisumu",
+        "name": "Achieng Odhiambo", "gender": "lesbian", "city": "Kisumu",
         "tagline": "Lake Victoria sunsets, Dunga fishing village, choma by the shore",
         "rate": 1000,
         "bio": "Kisumu is home. Fish market at Dunga at sunrise, sunset boat rides on Lake Victoria, and the friendliest people in Kenya. I'll also teach you a few words of Dholuo!",
@@ -96,7 +98,7 @@ COMPANIONS = [
                          "fri": "10:00-20:00", "sat": "10:00-20:00", "sun": "11:00-18:00"},
     },
     {
-        "name": "David Mutai", "gender": "male", "city": "Naivasha",
+        "name": "David Mutai", "gender": "straight_male", "city": "Naivasha",
         "tagline": "Boat rides, crescent island, and giraffe sightings",
         "rate": 1200,
         "bio": "Naivasha's lakes and wildlife are my playground. Kayak at sunrise, walk with giraffes on Crescent Island, enjoy lakeside coffee. Easy-going and safety-first.",
@@ -107,7 +109,7 @@ COMPANIONS = [
                          "sat": "08:00-19:00", "sun": "08:00-17:00"},
     },
     {
-        "name": "Halima Abdi", "gender": "female", "city": "Malindi",
+        "name": "Halima Abdi", "gender": "bi", "city": "Malindi",
         "tagline": "Historic Malindi, marine park boat trips, local cuisine",
         "rate": 1000,
         "bio": "From the Gede Ruins to the Vasco da Gama pillar, I'll show you Malindi's centuries of history — then the best fresh seafood at the local market. Warm, chatty, and reliable.",
@@ -118,7 +120,7 @@ COMPANIONS = [
                          "fri": "09:00-18:00", "sat": "09:00-18:00", "sun": "10:00-17:00"},
     },
     {
-        "name": "Kevin Ochieng", "gender": "male", "city": "Nairobi",
+        "name": "Kevin Ochieng", "gender": "gay_male", "city": "Nairobi",
         "tagline": "Gaming arcades, bowling, and safe nights out",
         "rate": 800,
         "bio": "Fun, laid-back and always up for an activity. Bowling, arcades, cinema, or a comedy night — I'll keep the vibes light and make sure you have a memorable evening out.",
@@ -130,7 +132,7 @@ COMPANIONS = [
         "featured": True,
     },
     {
-        "name": "Mercy Atieno", "gender": "female", "city": "Mombasa",
+        "name": "Mercy Atieno", "gender": "straight_female", "city": "Mombasa",
         "tagline": "Sunset swims, saltwater spa, and beach yoga",
         "rate": 1400,
         "bio": "Wellness lover in Mombasa. Beach yoga at dawn, swim coaching if you want it, and the best smoothie spots in Nyali. Calm energy, great conversation.",
@@ -141,7 +143,7 @@ COMPANIONS = [
                          "sat": "08:00-19:00", "sun": "08:00-17:00"},
     },
     {
-        "name": "James Mwangi", "gender": "male", "city": "Nyahururu",
+        "name": "James Mwangi", "gender": "straight_male", "city": "Nyahururu",
         "tagline": "Thomson's Falls, hiking, and quiet highland trails",
         "rate": 900,
         "bio": "Highlands explorer at heart. Guided walks around Thomson's Falls, Lake Ol' Bolossat birding, and long lunches at local farms. Prefer small groups and slow mornings.",
@@ -164,14 +166,14 @@ def seed(db: Session) -> None:
     admin = User(
         role="companion", is_admin=True, email=settings.ADMIN_EMAIL,
         password_hash=hash_password(settings.ADMIN_PASSWORD),
-        name="Pamoja Admin", is_approved=True,
+        name="Pamoja Admin", gender="straight_male", is_approved=True,
     )
     db.add(admin)
 
     traveler = User(
         role="traveler", email="demo@pamoja.ke",
         password_hash=hash_password("password123"),
-        name="Demo Traveler", city="Nairobi", gender="male",
+        name="Demo Traveler", city="Nairobi", gender="straight_male",
         interests=["photography", "food", "hiking"],
         languages=["English"],
         is_approved=True,
@@ -194,6 +196,7 @@ def seed(db: Session) -> None:
             verified_id=bool(c.get("verified", c.get("featured", False))),
             rating_avg=round(4.2 + (hash(c["name"]) % 8) / 10, 1),
             rating_count=3 + hash(c["name"]) % 40,
+            paid_until=datetime.utcnow() + timedelta(days=30),
         )
         db.add(user)
 
@@ -206,6 +209,78 @@ def run() -> None:
         seed(db)
     finally:
         db.close()
+
+
+def _seed_demo_reviews(db: Session) -> int:
+    """Seed believable reviews between Demo Traveler and a few seeded
+    companions so the home page testimonials and profile reviews have
+    something to show on a fresh install. Skipped in the test suite
+    (SEED_DEMO_REVIEWS=0) and whenever reviews already exist."""
+    import os
+
+    if os.environ.get("SEED_DEMO_REVIEWS", "1") != "1":
+        return 0
+
+    from datetime import datetime, timedelta
+
+    from .models import Booking, Review, User
+
+    if db.query(Review).count() > 0:
+        return 0
+
+    traveler = db.query(User).filter(User.email == "demo@pamoja.ke").first()
+    if not traveler:
+        return 0
+
+    reviews = [
+        ("wanjiru.kamau@pamoja.ke", "Coffee House Hangouts", 5,
+         "Wanjiru met me at the airport coffee spot exactly on time and we talked "
+         "for three hours like old friends. Felt completely safe walking around "
+         "Nairobi with her — she knew every shortcut and story."),
+        ("brian.otieno@pamoja.ke", "Hiking", 5,
+         "Brian drove us up to Ngong and patiently waited through every photo stop. "
+         "Great company, zero awkwardness, and he checked in with my emergency "
+         "contact plan before we started. Exactly what Pamoja promises."),
+        ("amina.yusuf@pamoja.ke", "Shopping Sprints", 4,
+         "Amina helped me navigate the market without any pushy sellers. Friendly "
+         "and honest — she even told me which stalls overprice. Booking and "
+         "payment were effortless."),
+        ("fatuma.hassan@pamoja.ke", "Heritage Walks", 5,
+         "The ID-verified matching made me comfortable booking as a solo traveller. "
+         "Fatuma's Old Town walk was the highlight of my entire trip. Booked her "
+         "again for my second Mombasa weekend."),
+    ]
+
+    created = 0
+    for email, activity, rating, comment in reviews:
+        companion = db.query(User).filter(User.email == email).first()
+        if not companion:
+            continue
+        start = (datetime.utcnow() - timedelta(days=10 + created * 12)).date()
+        booking = Booking(
+            traveler_id=traveler.id, companion_id=companion.id,
+            activity=activity, booking_date=start, start_time="10:00",
+            hours=3, rate_kes=1200, total_kes=3600,
+            commission_kes=540, payout_kes=3060,
+            status="completed",
+            completed_at=datetime.utcnow() - timedelta(days=8 + created * 12),
+            created_at=datetime.utcnow() - timedelta(days=20 + created * 12),
+        )
+        db.add(booking)
+        db.flush()
+        db.add(
+            Review(
+                booking_id=booking.id, reviewer_id=traveler.id,
+                reviewee_id=companion.id, rating=rating, comment=comment,
+                created_at=booking.completed_at,
+            )
+        )
+        created += 1
+
+    if created:
+        db.commit()
+        print(f"Demo reviews seeded: {created}")
+    return created
 
 
 if __name__ == "__main__":

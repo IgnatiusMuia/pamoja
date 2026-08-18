@@ -20,10 +20,55 @@ def test_register_duplicate_email(client):
     register(client, email=email)
     resp = client.post(
         "/auth/register",
-        json={"email": email, "password": "password123", "name": "Other", "role": "traveler"},
+        json={"email": email, "password": "password123", "name": "Other", "role": "traveler", "over_18": True},
     )
     assert resp.status_code == 400
     assert "already" in resp.json()["detail"].lower()
+
+
+def test_register_requires_18_plus_consent(client):
+    email = f"minor-{uuid.uuid4().hex[:8]}@pamoja.ke"
+    resp = client.post(
+        "/auth/register",
+        json={
+            "email": email, "password": "password123", "name": "Minor",
+            "role": "traveler", "over_18": False,
+        },
+    )
+    assert resp.status_code == 400
+    assert "18" in resp.json()["detail"]
+
+    # missing consent is rejected too
+    resp = client.post(
+        "/auth/register",
+        json={
+            "email": email, "password": "password123", "name": "Minor",
+            "role": "traveler",
+        },
+    )
+    assert resp.status_code == 400
+    assert "18" in resp.json()["detail"]
+
+    # birth_year under 18 is rejected even with consent
+    resp = client.post(
+        "/auth/register",
+        json={
+            "email": email, "password": "password123", "name": "Minor",
+            "role": "traveler", "over_18": True, "birth_year": 2015,
+        },
+    )
+    assert resp.status_code == 400
+    assert "18" in resp.json()["detail"]
+
+    # consent confirmed and age fine → success
+    resp = client.post(
+        "/auth/register",
+        json={
+            "email": email, "password": "password123", "name": "Adult",
+            "role": "traveler", "over_18": True, "birth_year": 1995,
+        },
+    )
+    assert resp.status_code == 200
 
 
 def test_login_wrong_password(client):

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const STEPS = [
   {
-    n: "01",
+    num: "01",
     title: "Search — free, no account",
     items: [
       "Browse companions by city, gender, activity, date, interests and languages",
@@ -11,7 +11,7 @@ const STEPS = [
     ],
   },
   {
-    n: "02",
+    num: "02",
     title: "Join as a member",
     items: [
       "Create a free account — we never charge travellers to browse",
@@ -20,7 +20,7 @@ const STEPS = [
     ],
   },
   {
-    n: "03",
+    num: "03",
     title: "Message & agree details",
     items: [
       "Use in-app chat — your personal contact stays private",
@@ -29,7 +29,7 @@ const STEPS = [
     ],
   },
   {
-    n: "04",
+    num: "04",
     title: "Send a booking request",
     items: [
       "Book a date, hours and activity with a clear total",
@@ -38,7 +38,7 @@ const STEPS = [
     ],
   },
   {
-    n: "05",
+    num: "05",
     title: "Meet in a public place",
     items: [
       "Meet somewhere public you both agree on",
@@ -47,7 +47,7 @@ const STEPS = [
     ],
   },
   {
-    n: "06",
+    num: "06",
     title: "Review each other",
     items: [
       "After a completed booking both sides leave a rating and review",
@@ -62,15 +62,15 @@ export default function HowItWorksPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
       <h1 className="text-3xl lg:text-4xl font-extrabold text-center">How Pamoja works</h1>
       <p className="text-stone-500 text-center mt-3 max-w-2xl mx-auto">
-        From browsing to meeting — everything happens in one safe, transparent place. Inspired by the
-        RentAFriend model that has connected millions of people for platonic friendship around the world.
+        From browsing to meeting — everything happens in one safe, transparent place. Trust and
+        safety are woven into every step.
       </p>
 
       <div className="mt-14 space-y-8">
         {STEPS.map((s) => (
-          <div key={s.n} className="bg-white border border-stone-200 rounded-2xl p-6 lg:p-8 shadow-sm flex gap-6">
+          <div key={s.num} className="bg-white border border-stone-200 rounded-2xl p-6 lg:p-8 shadow-sm flex gap-6">
             <div className="hidden sm:flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white text-2xl font-extrabold shadow">
-              {s.n}
+              {s.num}
             </div>
             <div>
               <h2 className="text-xl font-bold mb-3">{s.title}</h2>

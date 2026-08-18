@@ -48,11 +48,11 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-stone-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 lg:h-[4.5rem]">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <span className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white font-extrabold rounded-2xl px-2.5 py-1.5 text-xl shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform">
+          <span className="bg-emerald-600 text-white font-extrabold rounded-2xl px-2.5 py-1.5 text-xl shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform">
             P
           </span>
           <span className="font-extrabold text-2xl tracking-tight text-stone-900">
-            Pamoja<span className="text-gradient-warm">.</span>
+            Pamoja<span className="text-emerald-600">.</span>
           </span>
         </Link>
 
@@ -83,7 +83,7 @@ export default function Navbar() {
                 href="/dashboard"
                 className="text-sm font-semibold text-stone-600 hover:text-emerald-700 transition-colors"
               >
-                Hi, {user.name.split(" ")[0]} 👋
+                Hi, {user.name.split(" ")[0]} 
               </Link>
               <button
                 onClick={handleLogout}

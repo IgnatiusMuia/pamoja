@@ -12,7 +12,9 @@ export default function DashTabs({ role, isAdmin }) {
     { href: "/dashboard/saved", label: "Saved" },
     { href: "/dashboard/notifications", label: "Notifications" },
     { href: "/dashboard/profile", label: "My Profile" },
+    { href: "/pricing", label: "Pricing & Commission" },
     ...(role === "companion" ? [{ href: "/dashboard/companion-profile", label: "Companion Setup" }] : []),
+    ...(role === "companion" ? [{ href: "/dashboard/billing", label: "Billing" }] : []),
     ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];
   return (

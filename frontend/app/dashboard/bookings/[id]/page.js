@@ -86,7 +86,7 @@ export default function BookingDetailPage() {
   const other = user.role === "traveler" ? booking.companion : booking.traveler;
   const canAccept = user.role === "companion" && booking.status === "pending";
   const canCancel = user.role === "traveler" && ["pending", "accepted"].includes(booking.status);
-  const canComplete = booking.status === "accepted";
+  const canComplete = user.role === "companion" && booking.status === "accepted";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
@@ -108,7 +108,7 @@ export default function BookingDetailPage() {
             <div>
               <p className="text-sm text-stone-500">{user.role === "traveler" ? "Your companion" : "Traveller"}</p>
               <p className="text-xl font-extrabold">{other.name}</p>
-              <p className="text-sm text-stone-500">📍 {other.city}</p>
+              <p className="text-sm text-stone-500"> {other.city}</p>
             </div>
           </div>
           <StatusBadge status={booking.status} />
@@ -140,12 +140,12 @@ export default function BookingDetailPage() {
         <div className="mt-6 grid sm:grid-cols-2 gap-4">
           <div className="bg-stone-50 rounded-xl p-4">
             <p className="text-xs font-bold text-stone-400 uppercase">Activity</p>
-            <p className="font-semibold mt-1">🎯 {booking.activity}</p>
+            <p className="font-semibold mt-1"> {booking.activity}</p>
           </div>
           <div className="bg-stone-50 rounded-xl p-4">
             <p className="text-xs font-bold text-stone-400 uppercase">Date & time</p>
             <p className="font-semibold mt-1">
-              📅 {new Date(booking.booking_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+               {new Date(booking.booking_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
               {booking.start_time && <> at {booking.start_time}</>}
             </p>
             <p className="text-sm text-stone-500 mt-0.5">Duration: {booking.hours} hour{booking.hours > 1 ? "s" : ""}</p>
@@ -159,6 +159,44 @@ export default function BookingDetailPage() {
           </div>
         )}
 
+        {booking.status === "accepted" && (() => {
+            const msg = `I'm meeting ${other.name} (${other.city}) for ${booking.activity} on ${new Date(booking.booking_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })} at ${booking.start_time || "an agreed time"} for ${booking.hours} hour${booking.hours > 1 ? "s" : ""}.\n\nBooking ${booking.id} · via Pamoja`;
+            return (
+              <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50/60 p-4">
+                <p className="text-xs font-bold text-sky-700 uppercase">Share trip details</p>
+                <p className="text-sm text-stone-600 mt-1">
+                  Send the details below to your emergency contact so someone you trust knows where you'll be. Meet in a public place.
+                </p>
+                {user.emergency_name && user.emergency_phone && (
+                  <p className="text-sm font-semibold text-sky-700 mt-1.5">
+                    Your emergency contact: {user.emergency_name} ({user.emergency_phone})
+                  </p>
+                )}
+                <pre className="mt-3 whitespace-pre-wrap text-sm font-sans text-stone-700">{msg}</pre>
+                <button
+                  onClick={async (e) => {
+                    try {
+                      await navigator.clipboard.writeText(msg);
+                    } catch {
+                      const ta = document.createElement("textarea");
+                      ta.value = msg;
+                      document.body.appendChild(ta);
+                      ta.select();
+                      document.execCommand("copy");
+                      ta.remove();
+                    }
+                    const btn = e.currentTarget;
+                    btn.textContent = "Copied ✓";
+                    setTimeout(() => (btn.textContent = "Copy details"), 2000);
+                  }}
+                  className="mt-3 bg-sky-600 text-white hover:bg-sky-700 font-bold text-sm px-4 py-2 rounded-lg"
+                >
+                  Copy details
+                </button>
+              </div>
+            );
+          })()}
+
         {/* price breakdown */}
         <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
           <p className="text-xs font-bold text-emerald-700 uppercase mb-2">Payment breakdown</p>
@@ -167,17 +205,17 @@ export default function BookingDetailPage() {
             <div className="flex justify-between"><span className="text-stone-500">Pamoja commission (15%)</span><span className="text-stone-600">− {booking.commission_kes.toLocaleString()} KSH</span></div>
             <div className="flex justify-between border-t border-emerald-200 pt-1.5 font-bold"><span>Companion payout</span><span className="text-emerald-700">{booking.payout_kes.toLocaleString()} KSH</span></div>
           </div>
-          <p className="text-xs text-stone-400 mt-2 italic">💳 Secure payments (M-Pesa & cards) are coming soon — bookings now establish the agreement.</p>
+          <p className="text-xs text-stone-400 mt-2 italic"> You settle the total with your companion in person or by M-Pesa; Pamoja collects its 15% commission on completion. In-app checkout is on the roadmap.</p>
         </div>
 
         {/* actions */}
         <div className="mt-6 flex flex-wrap gap-3">
-          {(canAccept || canCancel || canComplete) && (
+          {booking.status !== "declined" && booking.status !== "cancelled" && (
             <Link
               href={`/dashboard/messages?user=${other.id}&booking=${booking.id}`}
               className="bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold px-5 py-2.5 rounded-xl"
             >
-              💬 Message {other.name.split(" ")[0]}
+              Message {other.name.split(" ")[0]}
             </Link>
           )}
           {canAccept && (
@@ -194,7 +232,7 @@ export default function BookingDetailPage() {
           )}
           {canComplete && (
             <button onClick={() => action("complete")} disabled={busy}
-              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl">
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl">
               ✓ Mark as completed
             </button>
           )}
@@ -211,7 +249,7 @@ export default function BookingDetailPage() {
       {booking.status === "completed" && (
         <div className="mt-8 bg-white border border-stone-200 rounded-3xl shadow-sm p-6 lg:p-8">
           <h2 className="font-extrabold text-lg mb-4">
-            {reviewed ? "✅ You reviewed this booking" : `How was your time with ${other.name.split(" ")[0]}?`}
+            {reviewed ? "You reviewed this booking" : `How was your time with ${other.name.split(" ")[0]}?`}
           </h2>
           {!reviewed && (
             <form onSubmit={submitReview}>

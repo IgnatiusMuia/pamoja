@@ -1,6 +1,6 @@
 const COLORS = [
-  "bg-emerald-600", "bg-teal-600", "bg-sky-600", "bg-orange-500",
-  "bg-blue-600", "bg-green-600", "bg-cyan-600", "bg-amber-500",
+  "bg-emerald-600", "bg-emerald-700", "bg-emerald-500", "bg-emerald-800",
+  "bg-stone-600", "bg-stone-700", "bg-emerald-900", "bg-stone-800",
 ];
 
 export default function Avatar({ user, size = "md", className = "" }) {

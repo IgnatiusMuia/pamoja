@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -20,6 +22,16 @@ def _issue_tokens(user: User) -> TokenOut:
 
 @router.post("/register", response_model=TokenOut)
 def register(body: RegisterIn, db: Session = Depends(get_db)):
+    if not body.over_18:
+        raise HTTPException(
+            status_code=400,
+            detail="Pamoja is strictly for members aged 18 and over. You must confirm you are 18 or older to join.",
+        )
+    if body.birth_year and date.today().year - body.birth_year < 18:
+        raise HTTPException(
+            status_code=400,
+            detail="Pamoja is strictly for members aged 18 and over.",
+        )
     if db.query(User).filter(User.email == body.email.lower()).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 

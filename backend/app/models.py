@@ -50,10 +50,27 @@ class CompanionProfile(Base):
     rating_count = Column(Integer, default=0)
     is_featured = Column(Boolean, default=False)
     verified_id = Column(Boolean, default=False)
+    id_document_url = Column(String, nullable=True)
+    id_verified_at = Column(DateTime, nullable=True)
+    paid_until = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="companion_profile")
+
+
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    amount_kes = Column(Integer, nullable=False)
+    method = Column(String, default="mpesa")  # mpesa | card
+    status = Column(String, default="paid")  # paid | pending | failed
+    reference = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", foreign_keys=[user_id])
 
 
 class Photo(Base):
@@ -84,6 +101,7 @@ class Booking(Base):
     payout_kes = Column(Integer, nullable=False)
     status = Column(String, default="pending")  # pending | accepted | declined | cancelled | completed
     notes = Column(Text, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     traveler = relationship("User", foreign_keys=[traveler_id])

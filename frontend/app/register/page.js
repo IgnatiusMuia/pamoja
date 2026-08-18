@@ -5,9 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { api } from "@/lib/api";
 import { setSession } from "@/lib/auth";
-
-const INTEREST_OPTIONS = ["coffee", "food", "art", "museums", "hiking", "photography", "wildlife", "history", "music", "sports", "beaches", "shopping"];
-const LANGUAGE_OPTIONS = ["English", "Swahili", "Kikuyu", "Dholuo", "Kalenjin", "Kamba", "Somali", "Luhya", "Maasai", "French", "German"];
+import { GENDER_OPTIONS } from "@/lib/gender";
+import { INTEREST_OPTIONS, LANGUAGE_OPTIONS } from "@/lib/options";
 
 function RegisterForm() {
   const router = useRouter();
@@ -20,6 +19,7 @@ function RegisterForm() {
   const [languages, setLanguages] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [over18, setOver18] = useState(false);
 
   function toggle(list, setList, value) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -32,7 +32,7 @@ function RegisterForm() {
     try {
       const data = await api("/auth/register", {
         method: "POST",
-        body: { ...form, role, interests, languages },
+        body: { ...form, role, interests, languages, over_18: over18 },
       });
       setSession(data);
       window.location.href = role === "companion" ? "/dashboard" : "/search";
@@ -50,8 +50,8 @@ function RegisterForm() {
 
       <div className="grid grid-cols-2 gap-3">
         {[
-          ["traveler", "🧳 Traveller", "Find companions to explore Kenya"],
-          ["companion", "🤝 Companion", "Show travellers your city & earn"],
+          ["traveler", "Traveller", "Find companions to explore Kenya"],
+          ["companion", "Companion", "Show travellers your city & earn"],
         ].map(([value, label, desc]) => (
           <button
             key={value}
@@ -101,9 +101,9 @@ function RegisterForm() {
           <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}
             className="mt-1 w-full rounded-lg border border-stone-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
             <option value="">Prefer not to say</option>
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-            <option value="other">Other</option>
+            {GENDER_OPTIONS.map((g) => (
+              <option key={g.value} value={g.value}>{g.label}</option>
+            ))}
           </select>
         </label>
       </div>
@@ -128,13 +128,23 @@ function RegisterForm() {
           {LANGUAGE_OPTIONS.map((l) => (
             <button key={l} type="button" onClick={() => toggle(languages, setLanguages, l)}
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
-                languages.includes(l) ? "bg-sky-600 text-white border-sky-600" : "bg-white text-stone-600 border-stone-300 hover:border-sky-400"
+                languages.includes(l) ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-stone-600 border-stone-300 hover:border-emerald-400"
               }`}>
               {l}
             </button>
           ))}
         </div>
       </div>
+
+      <label className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+        <input type="checkbox" required checked={over18} onChange={(e) => setOver18(e.target.checked)}
+          className="mt-0.5 h-4 w-4 accent-emerald-600" />
+        <span className="text-sm text-emerald-900">
+          <strong>I confirm I am 18 years or older.</strong> Pamoja is strictly for adults — members
+          under 18 are not allowed on the platform, and we verify every companion profile before
+          approval.
+        </span>
+      </label>
 
       <p className="text-xs text-stone-500">
         By joining you agree to our <Link href="/terms" className="underline">Terms</Link> and{" "}
@@ -156,7 +166,7 @@ export default function RegisterPage() {
       <div className="bg-white border border-stone-200 rounded-3xl shadow-sm p-8">
         <h1 className="text-2xl font-extrabold text-center">Join Pamoja</h1>
         <p className="text-stone-500 text-sm text-center mt-1 mb-6">
-          One account, two ways to use the platform.
+          A friend you can trust in every town. One account, two ways to use the platform.
         </p>
         <Suspense>
           <RegisterForm />

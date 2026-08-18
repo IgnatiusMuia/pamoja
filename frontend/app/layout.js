@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: {
-    default: "Pamoja — Platonic Travel Companions in Kenya",
+    default: "Pamoja — A friend you can trust in every town",
     template: "%s · Pamoja",
   },
   description:
-    "Find vetted local companions in Kenya for sightseeing, dining, museums, coffee and city adventures. Strictly platonic, purely social.",
+    "Kenya's verified platonic friendship network, strictly 18+. Meet vetted local companions for sightseeing, dining, museums, coffee and city adventures — strictly platonic, purely social.",
 };
 
 export default function RootLayout({ children }) {

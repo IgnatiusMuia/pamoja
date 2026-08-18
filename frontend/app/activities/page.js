@@ -5,20 +5,9 @@ export const metadata = {
   title: "Activities — ways to meet & hang out",
 };
 
-const THEME = [
-  "from-emerald-500 to-teal-600",
-  "from-amber-400 to-orange-500",
-  "from-sky-400 to-blue-600",
-  "from-rose-400 to-pink-600",
-  "from-violet-400 to-purple-600",
-  "from-teal-400 to-cyan-600",
-  "from-lime-400 to-green-600",
-  "from-orange-400 to-red-500",
-];
-
 export default function ActivitiesPage() {
   return (
-    <div className="bg-gradient-to-b from-stone-50 to-amber-50/40">
+    <div className="bg-stone-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
         {/* header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
@@ -26,7 +15,7 @@ export default function ActivitiesPage() {
             Ways to use Pamoja
           </span>
           <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight">
-            There's a <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">companion for everything</span>
+            There's a <span className="text-emerald-700">companion for everything</span>
           </h1>
           <p className="mt-4 text-stone-600 text-lg leading-relaxed">
             Coffee, safaris, gym sessions, weddings, language practice — if you'd enjoy it more with a
@@ -41,9 +30,9 @@ export default function ActivitiesPage() {
               key={a.value}
               className="group bg-white rounded-3xl border border-stone-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all p-6 flex flex-col"
             >
-              <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${THEME[i % THEME.length]} flex items-center justify-center text-2xl shadow-md mb-4`}>
-                {a.emoji}
-              </div>
+<div className="h-14 w-14 rounded-2xl bg-emerald-600 text-white font-extrabold text-xl flex items-center justify-center shadow-md mb-4">
+                  {a.label[0]}
+                </div>
               <h2 className="font-bold text-lg text-stone-900">{a.label}</h2>
               <p className="mt-2 text-sm text-stone-600 leading-relaxed grow">{a.text}</p>
             </div>
@@ -51,7 +40,7 @@ export default function ActivitiesPage() {
         </div>
 
         {/* CTA */}
-        <div className="mt-16 rounded-3xl bg-gradient-to-br from-emerald-700 via-teal-700 to-amber-600 p-10 lg:p-14 text-center text-white relative overflow-hidden">
+        <div className="mt-16 rounded-3xl bg-emerald-700 p-10 lg:p-14 text-center text-white relative overflow-hidden">
           <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-white/10" />
           <div className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-black/10" />
           <h2 className="relative text-3xl lg:text-4xl font-extrabold mb-3">Found your activity?</h2>

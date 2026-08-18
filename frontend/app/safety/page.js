@@ -2,32 +2,31 @@ import Link from "next/link";
 
 const RULES = [
   {
-    icon: "🪪",
-    title: "Profile approval",
-    text: "Every companion profile is manually reviewed before it appears in search. Optional ID verification adds a verified badge you can trust.",
+    title: "Adults only — strictly 18+",
+    text: "Pamoja is a platform for adults. Every member confirms they are 18 or older when joining, and any account found to be under 18 is permanently removed.",
   },
   {
-    icon: "🤝",
+    title: "Profile approval",
+    text: "Every companion profile is manually reviewed and ID-verified before it appears in search. ID verification is a mandatory part of our recruitment policy.",
+  },
+  {
     title: "Strictly platonic boundary",
     text: "Pamoja exists for friendship only. Dating, romance, sexual or adult requests are prohibited across profiles, messages and bookings. Violations lead to immediate suspension or removal.",
   },
   {
-    icon: "📝",
     title: "Two-way reviews",
     text: "After every completed booking, both the traveller and companion rate each other. Honest reviews are the backbone of our community.",
   },
   {
-    icon: "🛡️",
+    icon: "️",
     title: "Report & block",
     text: "Report any member from their profile or chat at any time. Blocking hides you from them instantly and stops messages.",
   },
   {
-    icon: "🚨",
     title: "Emergency contact",
     text: "Store an emergency contact in your account. In case of concern, you or authorities can reach them — we never share personal data without verified reason.",
   },
   {
-    icon: "🚫",
     title: "Zero tolerance",
     text: "Harassment, inappropriate messages, scams or abuse → account suspended and reported where appropriate. Our moderation team responds to reports within 24 hours.",
   },
@@ -49,14 +48,13 @@ export default function SafetyPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
       <h1 className="text-3xl lg:text-4xl font-extrabold text-center">Safety & trust</h1>
       <p className="text-stone-500 text-center mt-3 max-w-2xl mx-auto">
-        We built Pamoja like RentAFriend: a platform where platonic friendship is safe, simple and
-        respectful. Safety features are in every part of the experience.
+        Pamoja is Kenya's friendship network: a platform where platonic friendship is safe, simple and
+        respectful. Trust and safety are built into every part of the experience.
       </p>
 
       <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {RULES.map((r) => (
           <div key={r.title} className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-3xl mb-3">{r.icon}</div>
             <h3 className="font-bold text-lg mb-2">{r.title}</h3>
             <p className="text-sm text-stone-600 leading-relaxed">{r.text}</p>
           </div>
@@ -68,7 +66,7 @@ export default function SafetyPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {TIPS.map((t) => (
             <div key={t} className="flex gap-3 items-start bg-white/10 rounded-xl p-4 text-sm leading-relaxed">
-              <span className="text-orange-300 font-bold">✓</span> {t}
+              <span className="text-emerald-300 font-bold">✓</span> {t}
             </div>
           ))}
         </div>

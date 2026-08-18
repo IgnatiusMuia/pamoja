@@ -55,7 +55,7 @@ function ReportForm() {
   if (done)
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center">
-        <div className="text-5xl mb-4">✅</div>
+        <div className="text-5xl mb-4 text-emerald-600">✓</div>
         <h1 className="text-xl font-extrabold mb-2">Report received</h1>
         <p className="text-stone-500 text-sm mb-6">
           Thank you for keeping Pamoja safe. Our moderation team reviews every report.

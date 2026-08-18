@@ -23,7 +23,7 @@ CITIES = [
 ]
 
 ACTIVITY_TYPES = [
-    "city_tours", "resident_tours", "coffee", "dining", "home_cooking",
+    "city_tours", "resident_tours", "coffee", "dining", "clubbing", "home_cooking",
     "picnic", "parks", "beaches", "museums", "history", "wildlife",
     "zoo", "hot_air_balloon", "boat_rides", "hiking", "camping", "fishing",
     "biking", "swimming", "sports", "gym", "yoga", "dancing", "bowling",
@@ -39,9 +39,10 @@ AVAILABLE_ACTIVITY_LABELS = {
     "resident_tours": "Local Resident Tours",
     "coffee": "Coffee House Hangouts",
     "dining": "Dining Out",
+    "clubbing": "Clubbing & Dance Nights",
     "home_cooking": "Cooking & Baking Together",
     "picnic": "Picnics",
-    "parks": "Park Strolls",
+    "parks": "Park & Chill",
     "beaches": "Beach Days",
     "museums": "Museums & Art",
     "history": "History & Heritage",
@@ -92,6 +93,7 @@ def is_available_on(availability: dict, d: date) -> bool:
 
 
 def _companion_out(cp: CompanionProfile) -> CompanionOut:
+    now = datetime.utcnow()
     return CompanionOut(
         id=cp.user.id,
         name=cp.user.name,
@@ -110,10 +112,13 @@ def _companion_out(cp: CompanionProfile) -> CompanionOut:
         rating_avg=cp.rating_avg,
         rating_count=cp.rating_count,
         verified_id=cp.verified_id,
+        id_document_url=cp.id_document_url,
         is_featured=cp.is_featured,
         interests=cp.user.interests or [],
         languages=cp.user.languages or [],
         photos=[PhotoOut.model_validate(p) for p in cp.user.photos],
+        paid_until=cp.paid_until,
+        listing_active=bool(cp.paid_until and cp.paid_until >= now),
     )
 
 
@@ -147,6 +152,7 @@ def search_companions(
         .join(User)
         .options(joinedload(CompanionProfile.user).joinedload(User.photos))
         .filter(User.is_approved.is_(True), User.status == "active")
+        .filter(CompanionProfile.paid_until >= datetime.utcnow())
     )
     if city:
         q = q.filter(User.city == city)
@@ -197,6 +203,25 @@ def get_companion(companion_id: int, db: Session = Depends(get_db)):
     return _companion_out(cp)
 
 
+@router.get("/reviews/latest", response_model=list[ReviewOut])
+def latest_reviews(limit: int = 6, db: Session = Depends(get_db)):
+    reviews = (
+        db.query(Review)
+        .order_by(Review.created_at.desc())
+        .limit(min(limit, 20))
+        .all()
+    )
+    out = []
+    for r in reviews:
+        o = ReviewOut.model_validate(r)
+        reviewer = db.get(User, r.reviewer_id)
+        reviewee = db.get(User, r.reviewee_id)
+        o.reviewer_name = reviewer.name if reviewer else None
+        o.reviewee_name = reviewee.name if reviewee else None
+        out.append(o)
+    return out
+
+
 @router.get("/companions/{companion_id}/reviews", response_model=list[ReviewOut])
 def companion_reviews(companion_id: int, db: Session = Depends(get_db)):
     reviews = (
@@ -226,7 +251,10 @@ def update_companion_profile(
     if not cp:
         raise HTTPException(status_code=404, detail="Companion profile not found")
     for field, value in body.model_dump(exclude_unset=True).items():
-        setattr(cp, field, value)
+        if field in ("interests", "languages"):
+            setattr(user, field, value or [])
+        else:
+            setattr(cp, field, value)
 
     combined = " ".join(filter(None, [cp.tagline or "", cp.description or ""]))
     found = scan(combined)

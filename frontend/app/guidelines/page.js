@@ -6,6 +6,14 @@ export default function GuidelinesPage() {
 
       <div className="space-y-6 text-sm leading-relaxed">
         <section>
+          <h2 className="font-bold text-lg text-stone-900 mb-2">Be 18+</h2>
+          <p>
+            Pamoja is strictly for adults aged 18 and over. Every member confirms their age when joining;
+            minors are not permitted on the platform and underage accounts are removed permanently.
+          </p>
+        </section>
+
+        <section>
           <h2 className="font-bold text-lg text-stone-900 mb-2">Be platonic</h2>
           <p>
             Every interaction on Pamoja is for friendship and social experiences. No dating, no romance, no

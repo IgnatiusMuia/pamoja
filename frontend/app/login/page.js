@@ -40,7 +40,7 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {showDemo && (
-        <div className="bg-orange-50 border border-orange-200 text-orange-800 rounded-xl px-4 py-3 text-sm">
+        <div className="bg-stone-50 border border-stone-200 text-stone-700 rounded-xl px-4 py-3 text-sm">
           Your companion profile is pending approval by our team. Meanwhile, you can set up your profile.
         </div>
       )}
@@ -102,7 +102,7 @@ export default function LoginPage() {
     <div className="max-w-md mx-auto px-4 py-16">
       <div className="bg-white border border-stone-200 rounded-3xl shadow-sm p-8">
         <h1 className="text-2xl font-extrabold text-center">Welcome back</h1>
-        <p className="text-stone-500 text-sm text-center mt-1 mb-6">Log in to message, book and explore.</p>
+        <p className="text-stone-500 text-sm text-center mt-1 mb-6">Log in to message, book and explore — your contacts stay private.</p>
         <Suspense>
           <LoginForm />
         </Suspense>

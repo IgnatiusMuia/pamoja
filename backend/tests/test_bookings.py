@@ -203,9 +203,75 @@ def test_two_way_reviews_and_duplicate_guard(client):
 
     detail = client.get(f"/bookings/{b['id']}", headers=t_headers).json()
     assert detail["status"] == "completed"
+    assert detail["completed_at"] is not None
     # ratings recalculated for companion 4
     profile = client.get("/companions/4").json()
     assert profile["rating_count"] >= 1
+
+
+def test_latest_reviews_endpoint(client):
+    from .conftest import login
+
+    _, t_headers = new_traveler(client)
+    c_headers = login(client, "brian.otieno@pamoja.ke")  # companion 4
+
+    b = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": 4,
+            "activity": "Coffee House Hangouts",
+            "booking_date": _next_available("mon", "tue", "wed", "fri", "sat", "sun"),
+            "start_time": "14:00",
+            "hours": 2,
+        },
+    ).json()
+    client.post(f"/bookings/{b['id']}/accept", headers=c_headers)
+    client.post(f"/bookings/{b['id']}/complete", headers=t_headers)
+    client.post(
+        "/bookings/reviews", headers=t_headers,
+        json={"booking_id": b["id"], "rating": 5, "comment": "Killer coffee tour"},
+    )
+
+    # public, no auth
+    resp = client.get("/reviews/latest")
+    assert resp.status_code == 200
+    latest = resp.json()
+    assert latest and latest[0]["reviewer_name"]
+    assert any(r["reviewee_name"] == "Brian Otieno" for r in latest)
+
+    limited = client.get("/reviews/latest?limit=3").json()
+    assert len(limited) <= 3
+
+
+def test_completion_records_commission_payment(client):
+    from .conftest import login
+
+    _, t_headers = new_traveler(client)
+    c_headers = login(client, "brian.otieno@pamoja.ke")  # companion 4
+
+    b = client.post(
+        "/bookings",
+        headers=t_headers,
+        json={
+            "companion_id": 4,
+            "activity": "Hiking",
+            "booking_date": _next_available("mon", "tue", "wed", "fri", "sat", "sun"),
+            "start_time": "10:00",
+            "hours": 3,
+        },
+    ).json()
+    client.post(f"/bookings/{b['id']}/accept", headers=c_headers)
+    client.post(f"/bookings/{b['id']}/complete", headers=t_headers)
+
+    # Pamoja's 15% commission is recorded as a due payment for the companion
+    data = client.get("/billing/me", headers=c_headers).json()
+    commission = next(
+        (p for p in data.get("payments", []) or [] if p["method"] == "commission"), None
+    )
+    assert commission is not None
+    assert commission["amount_kes"] == b["commission_kes"]
+    assert commission["reference"] == f"BK-{b['id']}"
 
 
 def test_cannot_review_pending_booking(client):

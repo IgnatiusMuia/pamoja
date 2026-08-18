@@ -60,7 +60,6 @@ function MessageList() {
         <p className="text-center text-stone-400 py-16">Loading conversations…</p>
       ) : conversations.length === 0 ? (
         <div className="text-center py-20 bg-white border border-stone-200 rounded-2xl">
-          <div className="text-5xl mb-3">💬</div>
           <p className="font-bold text-stone-700 mb-1">No conversations yet</p>
           <p className="text-sm text-stone-500">
             Message a companion from their profile, or after sending a booking request.
@@ -78,12 +77,12 @@ function MessageList() {
               <div className="min-w-0 grow">
                 <p className="font-bold text-stone-800">{c.other_user.name}</p>
                 <p className="text-sm text-stone-500 truncate">
-                  {c.last_message ? c.last_message.body : "Say hello 👋"}
+                  {c.last_message ? c.last_message.body : "Say hello "}
                 </p>
               </div>
               <div className="text-right shrink-0">
                 {c.unread_count > 0 && (
-                  <span className="bg-orange-500 text-white text-xs font-bold rounded-full px-2 py-0.5">{c.unread_count}</span>
+                  <span className="bg-emerald-600 text-white text-xs font-bold rounded-full px-2 py-0.5">{c.unread_count}</span>
                 )}
                 <p className="text-xs text-stone-400 mt-1">
                   {c.last_message ? new Date(c.last_message.created_at).toLocaleDateString() : ""}

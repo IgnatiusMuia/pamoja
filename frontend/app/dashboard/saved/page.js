@@ -46,7 +46,7 @@ export default function SavedPage() {
         <div className="text-center py-20 text-stone-400">Loading…</div>
       ) : favs.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-stone-200">
-          <div className="text-5xl mb-3">🤍</div>
+          <div className="text-5xl mb-3"></div>
           <h3 className="font-bold text-lg text-stone-700">Nothing saved yet</h3>
           <p className="text-stone-500 text-sm mt-1 mb-5">Heart a companion to keep them here.</p>
           <Link href="/search" className="btn-primary px-6 py-3 text-sm">
@@ -57,17 +57,14 @@ export default function SavedPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {favs.map((c) => (
             <div key={c.id} className="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all border border-stone-200/80 overflow-hidden flex flex-col">
-              <div className={`relative h-36 bg-gradient-to-br ${
-                c.gender === "female" ? "from-amber-100 via-orange-50 to-rose-100" : c.gender === "male" ? "from-teal-100 via-emerald-50 to-sky-100" : "from-violet-100 via-fuchsia-50 to-amber-100"
-              } flex items-center justify-center`}>
-                <span className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_70%_20%,rgba(251,191,36,0.25),transparent_60%)]" />
+              <div className="h-36 bg-emerald-600 flex items-center justify-center">
                 <Avatar user={c} size="lg" className="h-20 w-20 text-2xl ring-4 ring-white shadow-lg" />
               </div>
               <div className="p-4 flex flex-col gap-1 grow">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-extrabold text-stone-900">{c.name}</h3>
-                    <p className="text-sm text-stone-500">📍 {c.city}</p>
+                    <p className="text-sm text-stone-500"> {c.city}</p>
                   </div>
                   <Stars rating={c.rating_avg} count={c.rating_count} />
                 </div>

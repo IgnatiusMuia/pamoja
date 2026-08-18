@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import CompanionCard from "@/components/CompanionCard";
 import { api } from "@/lib/api";
 import { ACTIVITIES } from "@/lib/activities";
+import { GENDER_OPTIONS } from "@/lib/gender";
 
 const CITIES = [
   "Nairobi", "Mombasa", "Diani", "Kisumu", "Nakuru", "Eldoret",
@@ -47,22 +48,27 @@ function SearchContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const seqRef = useRef(0);
   const runSearch = useCallback(async () => {
+    const seq = ++seqRef.current;
     setLoading(true);
     setError(null);
     try {
       const data = await api(`/companions?${buildQuery(filters)}`);
+      if (seq !== seqRef.current) return;
       setResults(data);
     } catch (e) {
+      if (seq !== seqRef.current) return;
       setError(e.message);
       setResults([]);
     } finally {
-      setLoading(false);
+      if (seq === seqRef.current) setLoading(false);
     }
   }, [JSON.stringify(filters)]);
 
   useEffect(() => {
-    runSearch();
+    const t = setTimeout(() => runSearch(), 350);
+    return () => clearTimeout(t);
   }, [runSearch]);
 
   function set(k, v) {
@@ -99,9 +105,9 @@ function SearchContent() {
             className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="">Any</option>
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-            <option value="other">Other</option>
+            {GENDER_OPTIONS.map((g) => (
+              <option key={g.value} value={g.value}>{g.label}</option>
+            ))}
           </select>
         </label>
         <label className="block">
@@ -193,7 +199,7 @@ function SearchContent() {
         <div className="text-center py-20 text-stone-400">Searching companions…</div>
       ) : results.length === 0 ? (
         <div className="text-center py-20">
-          <div className="text-5xl mb-4">🔎</div>
+          <div className="text-5xl mb-4"></div>
           <h3 className="font-bold text-lg text-stone-700">No companions match those filters</h3>
           <p className="text-stone-500 text-sm mt-1">Try widening your search or clearing some filters.</p>
           <button

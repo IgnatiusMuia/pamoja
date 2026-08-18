@@ -34,9 +34,9 @@ export default function BookingCard({ booking, me }) {
               {label}: {other.name}
             </p>
             <p className="text-sm text-stone-500">
-              📅 {new Date(booking.booking_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-              {booking.start_time && <> · 🕐 {booking.start_time}</>}
-              {" · "}⏱ {booking.hours} hr · {booking.activity}
+               {new Date(booking.booking_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+              {booking.start_time && <> ·  {booking.start_time}</>}
+              {" · "}{booking.hours} hr · {booking.activity}
             </p>
           </div>
         </div>

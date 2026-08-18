@@ -1,36 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #faf6f0;
-  --color-sunset: #fb923c;
-  --color-sunset-deep: #ea580c;
-  --color-savanna: #b45309;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  background-color: var(--color-cream);
+  background-color: #ffffff;
+  color: #1c1917;
 }
 
 ::selection {
-  background: #fbbf24;
-  color: #1c1917;
+  background: #a7f3d0;
+  color: #064e3b;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-@utility text-gradient-warm {
-  background-image: linear-gradient(90deg, #059669, #0d9488 50%, #f97316);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 @utility btn-primary {
-  background-image: linear-gradient(135deg, #059669, #0d9488);
+  background-color: #059669;
   color: white;
   font-weight: 700;
   border-radius: 0.9rem;
@@ -38,23 +28,24 @@ html {
   transition: all 0.2s ease;
 
   &:hover {
+    background-color: #047857;
     transform: translateY(-1px);
     box-shadow: 0 12px 24px -8px rgb(5 150 105 / 0.6);
-    filter: brightness(1.05);
   }
 }
 
 @utility btn-cta {
-  background-image: linear-gradient(135deg, #f97316, #f59e0b);
+  background-color: #059669;
   color: white;
   font-weight: 700;
   border-radius: 0.9rem;
-  box-shadow: 0 8px 20px -8px rgb(249 115 22 / 0.5);
+  box-shadow: 0 8px 20px -8px rgb(5 150 105 / 0.5);
   transition: all 0.2s ease;
 
   &:hover {
+    background-color: #047857;
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px -8px rgb(249 115 22 / 0.6);
+    box-shadow: 0 12px 24px -8px rgb(5 150 105 / 0.6);
   }
 }
 

@@ -6,10 +6,10 @@ import { api } from "@/lib/api";
 import { getToken, getUser } from "@/lib/auth";
 
 const ICONS = {
-  booking: "📅",
-  message: "💬",
-  review: "⭐",
-  system: "🔔",
+  booking: "",
+  message: "",
+  review: "",
+  system: "",
 };
 
 export default function NotificationBell() {
@@ -66,7 +66,7 @@ export default function NotificationBell() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
         </svg>
         {unread > 0 && (
-          <span className="absolute top-0.5 right-0.5 min-w-5 h-5 px-1 bg-gradient-to-br from-rose-500 to-red-600 text-white text-[11px] font-extrabold rounded-full flex items-center justify-center shadow">
+          <span className="absolute top-0.5 right-0.5 min-w-5 h-5 px-1 bg-red-600 text-white text-[11px] font-extrabold rounded-full flex items-center justify-center shadow">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -96,7 +96,7 @@ export default function NotificationBell() {
                 }`}
               >
                 <p className="text-sm font-bold text-stone-800">
-                  {ICONS[n.type] || "🔔"} {n.title}
+                  {ICONS[n.type] || ""} {n.title}
                 </p>
                 {n.body && <p className="text-xs text-stone-500 mt-0.5 line-clamp-2">{n.body}</p>}
                 <p className="text-[10px] text-stone-400 mt-1">

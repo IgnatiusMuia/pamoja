@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     COMMISSION_RATE: float = 0.15
+    LISTING_FEE_KES: int = 300
+    LISTING_MONTHS: int = 1
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
     ADMIN_EMAIL: str = "admin@pamoja.ke"
     ADMIN_PASSWORD: str = "admin123"

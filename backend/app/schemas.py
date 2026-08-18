@@ -14,6 +14,7 @@ class RegisterIn(BaseModel):
     birth_year: Optional[int] = None
     interests: Optional[list[str]] = []
     languages: Optional[list[str]] = []
+    over_18: bool = False  # mandatory consent: Pamoja is strictly 18+
 
 
 class LoginIn(BaseModel):
@@ -75,6 +76,9 @@ class CompanionProfileUpdateIn(BaseModel):
     description: Optional[str] = None
     activity_types: Optional[list[str]] = None
     availability: Optional[dict[str, Any]] = None
+    interests: Optional[list[str]] = None
+    languages: Optional[list[str]] = None
+    id_document_url: Optional[str] = None  # mandatory: government-issued ID photo
 
 
 class PhotoIn(BaseModel):
@@ -111,10 +115,32 @@ class CompanionOut(BaseModel):
     rating_avg: float = 0
     rating_count: int = 0
     verified_id: bool = False
+    id_document_url: Optional[str] = None
     is_featured: bool = False
     interests: list[str] = []
     languages: list[str] = []
     photos: list[PhotoOut] = []
+    paid_until: Optional[datetime] = None
+    listing_active: bool = False
+
+
+class BillingOut(BaseModel):
+    listing_fee_kes: int
+    paid_until: Optional[datetime] = None
+    listing_active: bool
+    last_payment: Optional["PaymentOut"] = None
+    payments: list["PaymentOut"] = []
+
+
+class PaymentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    amount_kes: int
+    method: str
+    status: str
+    reference: Optional[str] = None
+    created_at: datetime
 
 
 class BriefUserOut(BaseModel):
@@ -150,6 +176,7 @@ class BookingOut(BaseModel):
     payout_kes: int
     status: str
     notes: Optional[str] = None
+    completed_at: Optional[datetime] = None
     created_at: datetime
     traveler: BriefUserOut
     companion: BriefUserOut
@@ -212,6 +239,7 @@ class ReviewOut(BaseModel):
     comment: Optional[str] = None
     created_at: datetime
     reviewer_name: Optional[str] = None
+    reviewee_name: Optional[str] = None
 
 
 class ReportCreateIn(BaseModel):

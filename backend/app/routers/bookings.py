@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from ..config import settings
 from ..database import get_db
-from ..models import Booking, CompanionProfile, User
+from ..models import Booking, CompanionProfile, Payment, User
 from ..routers.companions import is_available_on
 from ..routers.notifications import notify
 from ..schemas import BookingCreateIn, BookingOut, ReviewCreateIn, ReviewOut
@@ -34,6 +34,7 @@ def _booking_out(b: Booking) -> BookingOut:
         payout_kes=b.payout_kes,
         status=b.status,
         notes=b.notes,
+        completed_at=b.completed_at,
         created_at=b.created_at,
         traveler=b.traveler,
         companion=b.companion,
@@ -217,6 +218,16 @@ def complete_booking(booking_id: int, user: User = Depends(get_current_user),
                      db: Session = Depends(get_db)):
     b = _participant_booking(booking_id, user, db, ("traveler", "companion"), ("accepted",))
     b.status = "completed"
+    b.completed_at = datetime.utcnow()
+    db.add(
+        Payment(
+            user_id=b.companion_id,
+            amount_kes=b.commission_kes,
+            method="commission",
+            status="due",
+            reference=f"BK-{b.id}",
+        )
+    )
     db.commit()
     notify(
         db, b.companion_id if user.id == b.traveler_id else b.traveler_id, "booking",

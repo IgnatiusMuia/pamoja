@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import DashTabs from "@/components/DashTabs";
 import { api } from "@/lib/api";
 import { getToken, requireAuth, setUser } from "@/lib/auth";
+import { GENDER_OPTIONS } from "@/lib/gender";
 
 export default function ProfilePage() {
   const [me, setMe] = useState(null);
@@ -68,7 +69,7 @@ export default function ProfilePage() {
       <p className="text-stone-500 text-sm mb-6">Your details, privacy and emergency contact.</p>
 
       <form onSubmit={save} className="bg-white border border-stone-200 rounded-3xl shadow-sm p-6 lg:p-8 space-y-4">
-        {saved && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">✅ Profile saved.</div>}
+        {saved && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">Profile saved.</div>}
         {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>}
 
         <label className="block">
@@ -80,9 +81,9 @@ export default function ProfilePage() {
             <span className="text-sm font-semibold text-stone-700">Gender</span>
             <select className={input} value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
               <option value="">Prefer not to say</option>
-              <option value="female">Female</option>
-              <option value="male">Male</option>
-              <option value="other">Other</option>
+              {GENDER_OPTIONS.map((g) => (
+                <option key={g.value} value={g.value}>{g.label}</option>
+              ))}
             </select>
           </label>
           <label className="block">
@@ -107,9 +108,9 @@ export default function ProfilePage() {
           </label>
         </div>
 
-        <div className="rounded-2xl bg-orange-50 border border-orange-200 p-4">
-          <h2 className="font-bold text-orange-800 mb-1">🚨 Emergency contact</h2>
-          <p className="text-xs text-orange-700 mb-3">
+        <div className="rounded-2xl bg-stone-50 border border-stone-200 p-4">
+          <h2 className="font-bold text-stone-800 mb-1">Emergency contact</h2>
+          <p className="text-xs text-stone-600 mb-3">
             Kept private and never shown to other members. Shared with you or emergency services in case of concern.
           </p>
           <div className="grid sm:grid-cols-2 gap-4">

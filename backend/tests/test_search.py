@@ -71,8 +71,9 @@ def test_companion_detail_not_found(client):
 
 def test_activities_catalogue(client):
     data = client.get("/activities").json()
-    assert len(data) == 45
+    assert len(data) == 46
     assert {"value": "coffee", "label": "Coffee House Hangouts"} in data
+    assert {"value": "clubbing", "label": "Clubbing & Dance Nights"} in data
 
 
 def test_cities_list(client):
@@ -93,7 +94,7 @@ def test_reviews_include_reviewer_name(client):
 
 
 def test_filter_by_interests_and_languages(client):
-    from .conftest import admin_headers, login, new_traveler
+    from .conftest import admin_headers
 
     data = client.post(
         "/auth/register",
@@ -103,13 +104,24 @@ def test_filter_by_interests_and_languages(client):
             "name": "Hiker Tester",
             "role": "companion",
             "city": "Nairobi",
-            "gender": "male",
+            "gender": "straight_male",
             "interests": ["hiking", "photography"],
             "languages": ["english", "kiswahili", "mandarin"],
+            "over_18": True,
         },
     ).json()
     uid = data["user"]["id"]
+    client.put(
+        "/profile/companion",
+        headers={"Authorization": f"Bearer {data['access_token']}"},
+        json={"id_document_url": "https://example.com/id.png"},
+    )
+    client.post(f"/admin/companions/{uid}/verify-id", headers=admin_headers(client))
     client.post(f"/admin/companions/{uid}/approve", headers=admin_headers(client))
+    client.post(
+        "/billing/mpesa/stk-push",
+        headers={"Authorization": f"Bearer {data['access_token']}"},
+    )
 
     by_interest = client.get("/companions?interests=hiking&page_size=48").json()
     assert any(c["id"] == uid for c in by_interest)
@@ -124,9 +136,9 @@ def test_filter_by_interests_and_languages(client):
 
 
 def test_filter_by_gender(client):
-    data = client.get("/companions?gender=male&page_size=48").json()
+    data = client.get("/companions?gender=straight_male&page_size=48").json()
     assert data
-    assert all(c["gender"] == "male" for c in data)
+    assert all(c["gender"] == "straight_male" for c in data)
 
 
 def test_sort_price_desc_and_newest(client):
@@ -148,6 +160,7 @@ def test_unapproved_companion_profile_is_404(client):
             "role": "companion",
             "city": "Nairobi",
             "gender": "female",
+            "over_18": True,
         },
     ).json()
     assert client.get(f"/companions/{data['user']['id']}").status_code == 404

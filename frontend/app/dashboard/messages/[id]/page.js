@@ -126,7 +126,7 @@ export default function ChatPage() {
       <div className="mt-4 bg-white border border-stone-200 rounded-3xl shadow-sm overflow-hidden flex flex-col h-[65vh]">
         <div className="border-b border-stone-200 px-5 py-4 bg-stone-50 flex items-center gap-3">
           <p className="text-sm text-stone-500">
-            💬 Remember: Pamoja is <strong>strictly platonic</strong> — keep it friendly and respectful.
+             Remember: Pamoja is <strong>strictly platonic</strong> — keep it friendly and respectful.
           </p>
           <span className={`ml-auto text-[11px] font-bold px-2.5 py-1 rounded-full ${
             live ? "bg-emerald-100 text-emerald-700" : "bg-stone-200 text-stone-500"
@@ -145,7 +145,7 @@ export default function ChatPage() {
                   mine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-white text-stone-800 rounded-bl-sm border border-stone-200"
                 }`}>
                   {m.flagged && (
-                    <p className="text-[10px] font-bold mb-1 opacity-80">⚠️ Auto-filtered — content not allowed on Pamoja was removed</p>
+                    <p className="text-[10px] font-bold mb-1 opacity-80">Auto-filtered — content not allowed on Pamoja was removed</p>
                   )}
                   <p className="leading-relaxed whitespace-pre-wrap">{m.body}</p>
                   <p className={`text-[10px] mt-1 ${mine ? "text-emerald-100" : "text-stone-400"}`}>

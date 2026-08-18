@@ -4,15 +4,16 @@ import { CITIES, CITY_INFO, citySlug } from "@/lib/cities";
 export default function Footer() {
   return (
     <footer className="mt-auto bg-stone-950 text-stone-300 relative">
-      <div className="h-1 bg-gradient-to-r from-emerald-600 via-teal-500 to-amber-500" />
+      <div className="h-1 bg-emerald-600" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <span className="bg-gradient-to-br from-emerald-500 to-teal-400 text-white font-extrabold rounded-xl px-2.5 py-1.5 shadow-md">P</span>
-            <span className="font-extrabold text-xl text-white">Pamoja<span className="text-gradient-warm">.</span></span>
+            <span className="bg-emerald-600 text-white font-extrabold rounded-xl px-2.5 py-1.5 shadow-md">P</span>
+            <span className="font-extrabold text-xl text-white">Pamoja<span className="text-emerald-400">.</span></span>
           </div>
           <p className="text-sm text-stone-400">
-            Kenya's platform for platonic travel companionship. Meet locals, explore cities, make friends — strictly social, always respectful.
+            A friend you can trust in every town. Pamoja connects travellers with vetted, verified
+            local companions for safe, platonic hangouts across Kenya.
           </p>
         </div>
         <div>
@@ -31,7 +32,7 @@ export default function Footer() {
             {CITIES.slice(0, 6).map((c) => (
               <li key={c}>
                 <Link className="hover:text-emerald-400" href={`/cities/${citySlug(c)}`}>
-                  {CITY_INFO[c].emoji} {c}
+                  {c}
                 </Link>
               </li>
             ))}
@@ -45,13 +46,13 @@ export default function Footer() {
             <li><Link className="hover:text-emerald-400" href="/guidelines">Community Guidelines</Link></li>
             <li><Link className="hover:text-emerald-400" href="/privacy">Privacy Policy</Link></li>
             <li><Link className="hover:text-emerald-400" href="/terms">Terms of Service</Link></li>
-            <li className="pt-2 text-stone-400">📧 support@pamoja.ke</li>
-            <li className="text-stone-500">📍 Nairobi, Kenya · Built with ❤️ in Kenya</li>
+            <li className="pt-2 text-stone-400">support@pamoja.ke</li>
+            <li className="text-stone-500">Nairobi, Kenya · Built in Kenya</li>
           </ul>
         </div>
       </div>
       <div className="border-t border-stone-800 py-4 text-center text-xs text-stone-500">
-        © {new Date().getFullYear()} Pamoja. Strictly platonic companionship. No dating, no romance, no adult services — ever.
+        © {new Date().getFullYear()} Pamoja. Strictly 18+. Strictly platonic companionship. No dating, no romance, no adult services — ever.
       </div>
     </footer>
   );

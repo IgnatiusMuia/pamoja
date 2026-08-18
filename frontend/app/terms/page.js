@@ -30,9 +30,11 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-lg text-stone-900 mb-2">3. Accounts</h2>
+          <h2 className="font-bold text-lg text-stone-900 mb-2">3. Accounts & age eligibility</h2>
           <p>
-            You must be 18 or older. You agree to provide accurate information. Accounts are personal —
+            Pamoja is strictly for members aged 18 and over. By creating an account you confirm you are
+            18 or older; underage use is prohibited and accounts found to belong to minors are removed
+            permanently. You agree to provide accurate information. Accounts are personal —
             do not share logins. We may suspend accounts that violate these terms or the Community Guidelines.
           </p>
         </section>

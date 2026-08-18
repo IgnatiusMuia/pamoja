@@ -4,6 +4,7 @@ os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 os.environ["JWT_SECRET"] = "test-only-secret-key-that-is-long-enough"
 os.environ["ADMIN_EMAIL"] = "admin@pamoja.ke"
 os.environ["ADMIN_PASSWORD"] = "admin123"
+os.environ["SEED_DEMO_REVIEWS"] = "0"
 
 import pytest
 from fastapi.testclient import TestClient
@@ -36,6 +37,7 @@ def register(client, email=None, password="password123", role="traveler", name="
         "role": role,
         "city": "Nairobi",
         "gender": "female",
+        "over_18": True,
     }
     body.update(extra)
     resp = client.post("/auth/register", json=body)

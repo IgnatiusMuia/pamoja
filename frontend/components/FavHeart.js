@@ -51,8 +51,8 @@ export default function FavHeart({ companionId, className = "" }) {
       aria-label={faved ? "Remove from saved" : "Save companion"}
       className={`${className} flex items-center justify-center rounded-full backdrop-blur transition-all active:scale-90 ${
         faved
-          ? "bg-gradient-to-br from-rose-500 to-red-500 text-white shadow-md shadow-rose-500/40"
-          : "bg-white/80 text-stone-500 hover:text-rose-500 hover:scale-110"
+          ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/40"
+          : "bg-white/80 text-stone-500 hover:text-emerald-600 hover:scale-110"
       } ${loading ? "opacity-60" : ""}`}
     >
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill={faved ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>

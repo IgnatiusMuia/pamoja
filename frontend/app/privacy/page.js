@@ -11,7 +11,7 @@ export default function PrivacyPage() {
             <li>Account details: name, email, password (hashed), role, gender, city</li>
             <li>Profile content: bio, interests, languages, photos, hourly rate, availability</li>
             <li>Activity: bookings, messages, reviews, reports and blocks</li>
-            <li>Optional safety data: ID verification status, emergency contact details</li>
+            <li>Safety data: ID verification status (mandatory for companions), emergency contact details</li>
           </ul>
         </section>
 
