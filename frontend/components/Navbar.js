@@ -31,6 +31,7 @@ export default function Navbar() {
         { href: "/search", label: "Find a Companion" },
         { href: "/activities", label: "Activities" },
         { href: "/how-it-works", label: "How It Works" },
+        { href: "/pricing", label: "Pricing" },
         { href: "/become-companion", label: "Become a Companion" },
         { href: "/safety", label: "Safety" },
       ]

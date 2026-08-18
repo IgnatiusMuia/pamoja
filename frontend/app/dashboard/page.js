@@ -59,44 +59,55 @@ export default function DashboardPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <DashTabs role={user.role} isAdmin={user.is_admin} />
 
-      <div className="bg-emerald-900 text-white rounded-3xl p-8 lg:p-10 mb-8">
-        {user.role === "traveler" ? (
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-extrabold">
-                Welcome, {user.name.split(" ")[0]}
-              </h1>
-              <p className="text-emerald-100 mt-1">
-                Find a vetted local companion and start planning your next hangout.
-              </p>
-              <div className="flex flex-wrap gap-3 mt-6">
+      <div className="bg-emerald-900 text-white rounded-3xl p-8 lg:p-12 mb-8 text-center relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            background:
+              "radial-gradient(60% 80% at 50% 0%, rgba(52,211,153,.35) 0%, rgba(16,185,129,.12) 45%, transparent 70%)",
+          }}
+        />
+        <div className="relative">
+          <span className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-emerald-50 text-sm font-semibold px-4 py-1.5 rounded-full mb-5">
+            Welcome, {user.name.split(" ")[0]} — you're part of the Pamoja community
+          </span>
+          <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight tracking-tight">
+            Travel Kenya.{" "}
+            <span className="text-emerald-300">Never alone.</span>
+          </h1>
+          <p className="mt-3 text-emerald-100 max-w-2xl mx-auto">
+            {user.role === "traveler"
+              ? "Find a vetted local companion and start planning your next hangout."
+              : "Companion dashboard — manage your availability, listings and bookings."}
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 mt-6">
+            {user.role === "traveler" ? (
+              <>
                 <Link href="/search" className="inline-block bg-white hover:bg-emerald-50 text-emerald-900 font-bold px-6 py-3 rounded-xl transition-colors">
                   Find a companion
                 </Link>
                 <Link href="/activities" className="inline-block bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold px-6 py-3 rounded-xl transition-colors">
                   Browse activities
                 </Link>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard/companion-profile" className="inline-block bg-white hover:bg-emerald-50 text-emerald-900 font-bold px-6 py-3 rounded-xl transition-colors">
+                  Manage my profile
+                </Link>
+                <Link href="/dashboard/billing" className="inline-block bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold px-6 py-3 rounded-xl transition-colors">
+                  Listing & payments
+                </Link>
+              </>
+            )}
           </div>
-        ) : (
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-extrabold">
-                Welcome, {user.name.split(" ")[0]}
-              </h1>
-              <p className="text-emerald-100 mt-1">
-                Companion dashboard — manage your availability and bookings.
-              </p>
-              {!user.is_approved && (
-                <div className="mt-4 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm text-emerald-50">
-                  Your companion profile is <strong>pending approval</strong>. Our team reviews profiles to
-                  keep the community safe — you will appear in search as soon as you are approved.
-                </div>
-              )}
+          {user.role === "companion" && !user.is_approved && (
+            <div className="mt-5 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm text-emerald-50 inline-block">
+              Your companion profile is <strong>pending approval</strong>. Our team reviews profiles to
+              keep the community safe — you will appear in search as soon as you are approved.
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* stat cards */}

@@ -7,6 +7,7 @@ import { getToken, getUser } from "@/lib/auth";
 
 const ICONS = {
   booking: "",
+  booking_reminder: "",
   message: "",
   review: "",
   system: "",
