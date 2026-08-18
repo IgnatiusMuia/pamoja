@@ -123,20 +123,22 @@ def _listing_expiry_reminders(db: Session, days_before: int = 3) -> int:
 
 
 def _migrate():
-    """Lightweight schema migrations for existing SQLite databases."""
+    """Lightweight schema migrations for existing databases."""
     import sqlalchemy as sa
+
+    ts_type = "TIMESTAMP" if engine.dialect.name == "postgresql" else "DATETIME"
 
     with engine.begin() as conn:
         booking_cols = [c["name"] for c in sa.inspect(conn).get_columns("bookings")]
         if "completed_at" not in booking_cols:
-            conn.execute(sa.text("ALTER TABLE bookings ADD COLUMN completed_at DATETIME"))
+            conn.execute(sa.text(f"ALTER TABLE bookings ADD COLUMN completed_at {ts_type}"))
             print("Migration: added bookings.completed_at")
         profile_cols = [c["name"] for c in sa.inspect(conn).get_columns("companion_profiles")]
         if "id_document_url" not in profile_cols:
             conn.execute(sa.text("ALTER TABLE companion_profiles ADD COLUMN id_document_url VARCHAR"))
             print("Migration: added companion_profiles.id_document_url")
         if "id_verified_at" not in profile_cols:
-            conn.execute(sa.text("ALTER TABLE companion_profiles ADD COLUMN id_verified_at DATETIME"))
+            conn.execute(sa.text(f"ALTER TABLE companion_profiles ADD COLUMN id_verified_at {ts_type}"))
             print("Migration: added companion_profiles.id_verified_at")
 
 

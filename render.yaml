@@ -1,0 +1,29 @@
+# Render blueprint: Pamoja API (FastAPI).
+# Frontend deploys separately to Netlify (see frontend/netlify.toml).
+# Free tier: the service sleeps after 15 min idle — first request after idle
+# pauses the moment; a free Neon Postgres database is recommended for DATABASE_URL.
+
+services:
+  - type: web
+    name: pamoja-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false # paste Neon/Supabase Postgres URL in the dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@pamoja.ke
+      - key: ADMIN_PASSWORD
+        sync: false # set a strong admin password in the dashboard
+      - key: CORS_ORIGINS
+        sync: false # e.g. https://pamoja.netlify.app
+      - key: SEED_DEMO_REVIEWS
+        value: "0"
+      - key: UPLOAD_DIR
+        value: /tmp/uploads # uploaded ID documents: ephemeral on free tier

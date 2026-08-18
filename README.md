@@ -127,3 +127,36 @@ Full walkthrough: see `docs/ROADMAP.md` (step 6) or the API docs at `/docs`.
 ## Deployment
 
 See `docs/DEPLOY.md` for the step-by-step go-live guide (Vercel + Render + Neon).
+## Deploy (GitHub → Netlify + Render)
+
+### 1. Push to GitHub
+
+```bash
+gh repo create pamoja --public --source . --push
+```
+
+### 2. Backend on Render (free)
+
+1. New → Blueprint → pick the `pamoja` repo — `render.yaml` is auto-detected.
+2. In the service's **Environment** tab set:
+   - `DATABASE_URL` → free Neon/`Supabase` Postgres URL (required for persistence)
+   - `CORS_ORIGINS` → your Netlify URL (e.g. `https://pamoja.netlify.app`)
+   - `ADMIN_PASSWORD` → your admin password
+3. Deploy. Note `https://pamoja-api.onrender.com` (check `/health`).
+
+> The app runs on SQLite locally; in production use Postgres (the schema is
+> created + migrated automatically on startup). Uploads live in `/tmp` on the
+> free tier and are wiped on restart — attach a disk for real ID documents.
+
+### 3. Frontend on Netlify
+
+```bash
+cd frontend
+npx netlify login          # browser auth once
+npx netlify init           # creates site, connects to git repo
+npx netlify env:set NEXT_PUBLIC_API_URL https://<your-api>.onrender.com
+npx netlify env:set NEXT_PUBLIC_SITE_URL https://<your-site>.netlify.app
+npx netlify deploy --prod  # or push to main (CI auto-deploys)
+```
+
+Netlify picks up `netlify.toml` + `@netlify/plugin-nextjs` automatically.
