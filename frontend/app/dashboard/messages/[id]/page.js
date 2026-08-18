@@ -29,7 +29,7 @@ export default function ChatPage() {
 
   async function load() {
     const data = await api(`/conversations/${id}/messages`, { token: getToken() });
-    setMessages(data);
+    setMessages(data.map((m) => ({ ...m, created_at: m.created_at + (m.created_at.endsWith("Z") ? "" : "Z") })));
   }
 
   useEffect(() => {
@@ -148,8 +148,9 @@ export default function ChatPage() {
                     <p className="text-[10px] font-bold mb-1 opacity-80">Auto-filtered — content not allowed on Pamoja was removed</p>
                   )}
                   <p className="leading-relaxed whitespace-pre-wrap">{m.body}</p>
-                  <p className={`text-[10px] mt-1 ${mine ? "text-emerald-100" : "text-stone-400"}`}>
+                  <p className={`text-[10px] mt-1 flex items-center gap-1 justify-end ${mine ? "text-emerald-100" : "text-stone-400"}`}>
                     {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {mine && m.read_at && <span className="font-bold">Seen</span>}
                   </p>
                 </div>
               </div>

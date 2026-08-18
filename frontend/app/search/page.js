@@ -13,6 +13,8 @@ const CITIES = [
   "Nyeri", "Malindi", "Lamu", "Naivasha", "Machakos", "Thika", "Nyahururu",
 ];
 
+const PAGE_SIZE = 12;
+
 function buildQuery(params) {
   const q = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
@@ -47,6 +49,8 @@ function SearchContent() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   const seqRef = useRef(0);
   const runSearch = useCallback(async () => {
@@ -54,16 +58,22 @@ function SearchContent() {
     setLoading(true);
     setError(null);
     try {
-      const data = await api(`/companions?${buildQuery(filters)}`);
+      const data = await api(`/companions?${buildQuery(filters)}&page=${page}`);
       if (seq !== seqRef.current) return;
-      setResults(data);
+      setResults((prev) => (page === 1 ? data : [...prev, ...data]));
+      setHasMore(data.length === PAGE_SIZE);
     } catch (e) {
       if (seq !== seqRef.current) return;
       setError(e.message);
       setResults([]);
+      setHasMore(false);
     } finally {
       if (seq === seqRef.current) setLoading(false);
     }
+  }, [JSON.stringify(filters), page]);
+
+  useEffect(() => {
+    setPage(1);
   }, [JSON.stringify(filters)]);
 
   useEffect(() => {
@@ -224,6 +234,21 @@ function SearchContent() {
               <CompanionCard key={c.id} companion={c} />
             ))}
           </div>
+          {!loading && hasMore && (
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                className="bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold px-8 py-3 rounded-xl transition-colors"
+              >
+                Show more companions
+              </button>
+            </div>
+          )}
+          {!loading && !hasMore && results.length > PAGE_SIZE && (
+            <p className="mt-6 text-center text-sm text-stone-400">
+              You've seen all {results.length} matching companions.
+            </p>
+          )}
         </>
       )}
     </div>
